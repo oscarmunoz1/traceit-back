@@ -28,9 +28,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.getenv("DEBUG"))
 
-ALLOWED_HOSTS = [os.getenv("ALLOWED_HOST"), "127.0.0.1"]
+ALLOWED_HOSTS = [os.getenv("ALLOWED_HOST"), "localhost"]
 
-CSRF_TRUSTED_ORIGINS = [os.getenv("CSRF_TRUSTED_ORIGINS"), "http://127.0.0.1:8000/"]
+CSRF_TRUSTED_ORIGINS = [os.getenv("CSRF_TRUSTED_ORIGINS"), "http://localhost:8000/"]
 
 # Application definition
 
@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "users",
+    "company",
+    "product",
+    "history",
     # django-allauth apps
     "allauth",
     "allauth.account",
