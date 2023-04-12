@@ -1,14 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import UserProfile, User
+from .models import User, WorksIn, VerificationCode
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
 
-class UserProfileInline(admin.StackedInline):
-    model = UserProfile
-    can_delete = False
-    verbose_plural_name = "User Profile"
-    fk_name = "user"
+class RoleInline(admin.TabularInline):
+    model = WorksIn
+    extra = 1
 
 
 class CustomUserAdmin(UserAdmin):
@@ -18,7 +16,7 @@ class CustomUserAdmin(UserAdmin):
     list_display_links = ["email"]
     search_fields = ("email",)
     ordering = ("email",)
-    # inlines = (UserProfileInline,)
+    inlines = (RoleInline,)
     list_display = (
         "email",
         "is_staff",
@@ -70,4 +68,4 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.register(User, CustomUserAdmin)
-admin.site.register(UserProfile)
+admin.site.register(VerificationCode)

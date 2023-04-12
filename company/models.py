@@ -3,14 +3,15 @@ from django.db import models
 
 class Company(models.Model):
     name = models.CharField(max_length=30)
-    tradename = models.CharField(max_length=30)
+    tradename = models.CharField(max_length=30, blank=True, null=True)
     address = models.CharField(max_length=30)
     city = models.CharField(max_length=30)
     state = models.CharField(max_length=30)
     country = models.CharField(max_length=30)
-    fiscal_id = models.CharField(max_length=30, help_text="RUT")
+    fiscal_id = models.CharField(max_length=30, help_text="RUT", blank=True, null=True)
     logo = models.ImageField(upload_to="company_logos", blank=True)
     description = models.TextField(blank=True, null=True)
+    invitation_code = models.CharField(max_length=30, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -24,6 +25,7 @@ class Establishment(models.Model):
     state = models.CharField(max_length=30)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     image = models.ImageField(upload_to="establishment_images", blank=True)
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name

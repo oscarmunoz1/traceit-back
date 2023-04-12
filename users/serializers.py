@@ -3,21 +3,62 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
 from django.contrib.auth.models import update_last_login
 from django.core.exceptions import ObjectDoesNotExist
-from .models import User
+from .models import User, WorksIn
 
 
-class UserSerializer(serializers.ModelSerializer):
+class WorksInSerializer(serializers.ModelSerializer):
+    """
+    Serializer for WorksIn.
+    """
+    id = serializers.ReadOnlyField(source='company.id')
+    name = serializers.ReadOnlyField(source='company.name')
+
+    class Meta:
+        model = WorksIn
+        fields = ('id', 'name', 'role',)
+
+    def get_picture(self, obj):
+        return obj.company.picture.url if obj.company.picture else None
+
+
+class BasicUserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User.
+    """
+    companies = WorksInSerializer(source='worksin_set', many=True)
+    full_name = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = User
         fields = [
-            "id",
-            "username",
-            "email",
-            "is_active",
+            'id',
+            'email',
+            'phone',
+            'full_name',
+            'is_superuser',
+            'companies',
+            'first_name',
+            'last_name',
         ]
         read_only_field = [
             "is_active",
         ]
+    
+    def get_full_name(self, user):
+        return user.get_full_name()
+
+
+class MeSerializer(BasicUserSerializer):
+    """
+    Serializer for User to get their profile.
+    """
+
+    class Meta:
+        model = User
+        fields = BasicUserSerializer.Meta.fields + [
+            'username',
+        ]
+        read_only_fields = ['username']
 
 
 class LoginSerializer(TokenObtainPairSerializer):
@@ -26,7 +67,7 @@ class LoginSerializer(TokenObtainPairSerializer):
 
         refresh = self.get_token(self.user)
 
-        data["user"] = UserSerializer(self.user).data
+        data["user"] = BasicUserSerializer(self.user).data
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
 
@@ -36,7 +77,7 @@ class LoginSerializer(TokenObtainPairSerializer):
         return data
 
 
-class RegisterSerializer(UserSerializer):
+class RegisterSerializer(BasicUserSerializer):
     password = serializers.CharField(
         max_length=128, min_length=8, write_only=True, required=True
     )
