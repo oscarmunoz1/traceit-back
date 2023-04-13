@@ -29,8 +29,14 @@ class EventAdmin(admin.ModelAdmin):
 
 class HistoryAdmin(admin.ModelAdmin):
     list_display = ("start_date",)
-    list_filter = ("name", "start_date", "description")
-    search_fields = ("name", "start_date", "description")
+    list_filter = (
+        "name",
+        "start_date",
+    )
+    search_fields = (
+        "name",
+        "start_date",
+    )
     inlines = [ChemicalEventInline, WeatherEventInline, GeneralEventInline]
 
 

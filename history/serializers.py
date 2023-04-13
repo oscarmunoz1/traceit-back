@@ -46,7 +46,6 @@ class HistorySerializer(serializers.ModelSerializer):
             "start_date",
             "finish_date",
             "name",
-            "description",
             "published",
             "events",
             "earning",

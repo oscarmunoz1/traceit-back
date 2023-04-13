@@ -32,7 +32,6 @@ class EventViewSet(viewsets.ModelViewSet):
         if parcel.current_history is None:
             history = History.objects.create(
                 name="Default History",
-                description="Default History",
                 start_date=datetime.now(),
                 published=False,
                 parcel=parcel,

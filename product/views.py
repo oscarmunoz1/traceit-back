@@ -22,7 +22,21 @@ class ParcelViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"])
     def history(self, request, pk=None):
         parcel = self.get_object()
-        if parcel.current_history is None:
-            return Response([])
-        histories = parcel.histories.exclude(id=parcel.current_history.id).all()
+
+        histories = parcel.histories.all()
+        if parcel.current_history is not None:
+            return Response(
+                HistorySerializer(
+                    histories.exclude(id=parcel.current_history.id), many=True
+                ).data
+            )
         return Response(HistorySerializer(histories, many=True).data)
+
+    @action(detail=True, methods=["post"])
+    def finish_history(self, request, pk=None):
+        parcel = self.get_object()
+        history_data = request.data
+        history = parcel.finish_current_history(history_data)
+        if history is not None:
+            return Response(HistorySerializer(history).data)
+        return Response(status=400)

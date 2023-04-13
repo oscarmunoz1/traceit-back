@@ -13,9 +13,11 @@ class History(models.Model):
     name = models.CharField(max_length=30, blank=True, null=True)
     start_date = models.DateTimeField(null=True, blank=True)
     finish_date = models.DateTimeField(null=True, blank=True)
-    description = models.TextField()
     published = models.BooleanField(default=False)
     earning = models.FloatField(default=0)
+    lot_id = models.CharField(max_length=30, blank=True, null=True)
+    observation = models.TextField(blank=True, null=True)
+    production_amount = models.FloatField(default=0)
     qr_code = models.ImageField(upload_to="qr_codes", blank=True)
     parcel = models.ForeignKey(
         Parcel,
@@ -50,6 +52,15 @@ class History(models.Model):
         )
 
         super().save(*args, **kwargs)
+
+    def finish(self, history_data):
+        print(history_data)
+        self.finish_date = history_data["finish_date"]
+        self.observation = history_data["observation"]
+        self.published = True
+        self.production_amount = history_data["production_amount"]
+        self.lot_id = history_data["lot_id"]
+        self.save()
 
     @property
     def certificate_percentage(self):
