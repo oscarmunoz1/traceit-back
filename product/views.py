@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets, permissions, filters
 from .models import Parcel
-from .serializers import RetrieveParcelSerializer
+from .serializers import RetrieveParcelSerializer, CreateParcelSerializer
 from history.serializers import HistorySerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -12,6 +12,11 @@ class ParcelViewSet(viewsets.ModelViewSet):
     serializer_class = RetrieveParcelSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.OrderingFilter]
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return RetrieveParcelSerializer
+        return CreateParcelSerializer
 
     @action(detail=True, methods=["get"])
     def current_history(self, request, pk=None):

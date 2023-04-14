@@ -54,7 +54,6 @@ class History(models.Model):
         super().save(*args, **kwargs)
 
     def finish(self, history_data):
-        print(history_data)
         self.finish_date = history_data["finish_date"]
         self.observation = history_data["observation"]
         self.published = True

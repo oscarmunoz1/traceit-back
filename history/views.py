@@ -25,19 +25,20 @@ class EventViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.OrderingFilter]
 
     def perform_create(self, serializer):
-        parcel_id = self.request.data.get("parcel", None)
-        if parcel_id is None:
+        parcels = self.request.data.get("parcels", None)
+        if parcels is None or parcels is []:
             raise Exception("Parcel is required")
-        parcel = Parcel.objects.get(id=parcel_id)
-        if parcel.current_history is None:
-            history = History.objects.create(
-                name="Default History",
-                start_date=datetime.now(),
-                published=False,
-                parcel=parcel,
-            )
-            parcel.current_history = history
-            parcel.save()
-        else:
-            history = parcel.current_history
-        serializer.save(history=history)
+        parcels = Parcel.objects.filter(id__in=parcels)
+        for parcel in parcels:
+            if parcel.current_history is None:
+                history = History.objects.create(
+                    name="Default History",
+                    start_date=datetime.now(),
+                    published=False,
+                    parcel=parcel,
+                )
+                parcel.current_history = history
+                parcel.save()
+            else:
+                history = parcel.current_history
+            WeatherEvent.objects.create(history=history, **serializer.validated_data)
