@@ -20,6 +20,7 @@ class EstablishmentSerializer(ModelSerializer):
             "image",
             "parcels",
             "image",
+            "country",
         )
 
     def get_parcels(self, establishment):
@@ -32,21 +33,74 @@ class DetailEstablishmentSerializer(ModelSerializer):
         fields = "__all__"
 
 
-class CreateEstablishmentSerializer(ModelSerializer):
+class UpdateEstablishmentSerializer(ModelSerializer):
     class Meta:
         model = Establishment
         fields = "__all__"
+
+    def to_representation(self, instance):
+        return EstablishmentSerializer(instance).data
 
 
 class RetrieveEstablishmentSerializer(ModelSerializer):
+    parcels = serializers.SerializerMethodField()
+
     class Meta:
         model = Establishment
         fields = "__all__"
 
-    parcels = serializers.SerializerMethodField()
-
     def get_parcels(self, establishment):
         return ParcelBasicSerializer(establishment.parcels.all(), many=True).data
+
+
+class EstablishmentChartSerializer(serializers.Serializer):
+    series = serializers.ListField()
+    options = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Establishment
+        fields = ["series", "options"]
+
+    def get_options(self, establishment):
+        period = self.context["period"]
+        if period == "week":
+            week_days = [
+                "Sun",
+                "Mon",
+                "Tue",
+                "Wed",
+                "Thu",
+                "Fri",
+                "Sat",
+            ]
+            return [week_days[day - 1] for day in self.context["days"]]
+        elif period == "month":
+            return self.context["days"]
+        elif period == "year":
+            return [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December",
+            ]
+        return []
+
+
+class EstablishmentProductsReputationSerializer(serializers.Serializer):
+    series = serializers.ListField()
+    options = serializers.ListField()
+
+    class Meta:
+        model = Establishment
+        fields = ["series", "options"]
 
 
 class RetrieveCompanySerializer(ModelSerializer):

@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 
 
 class Company(models.Model):
@@ -13,8 +15,15 @@ class Company(models.Model):
     description = models.TextField(blank=True, null=True)
     invitation_code = models.CharField(max_length=30, blank=True, null=True)
 
+    class Meta:
+        verbose_name = _("Company")
+        verbose_name_plural = _("Companies")
+
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("company-detail", kwargs={"id": self.id})
 
 
 class Establishment(models.Model):
@@ -26,6 +35,14 @@ class Establishment(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     image = models.ImageField(upload_to="establishment_images", blank=True)
     description = models.TextField(blank=True, null=True)
+    country = models.CharField(max_length=30, blank=True, null=True)
 
-    def __str__(self):
+    class Meta:
+        verbose_name = _("Establishment")
+        verbose_name_plural = _("Establishments")
+
+    def __str__(self) -> str:
         return self.name
+
+    def get_absolute_url(self) -> str:
+        return reverse("establishment-detail", kwargs={"id": self.id})

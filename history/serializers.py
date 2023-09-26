@@ -1,6 +1,14 @@
 from rest_framework import serializers
 
-from .models import History, CommonEvent, ChemicalEvent, WeatherEvent, GeneralEvent
+from .models import (
+    History,
+    CommonEvent,
+    ChemicalEvent,
+    WeatherEvent,
+    GeneralEvent,
+    HistoryScan,
+    ProductionEvent,
+)
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -9,35 +17,79 @@ class EventSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ChemicalEventSerializer(EventSerializer):
+class UpdateChemicalEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChemicalEvent
-        fields = [
-            "id",
-            "type",
-            "volume",
-            "concentration",
-            "time_period",
-            "observation",
-        ]
+        fields = "__all__"
 
 
-class WeatherEventSerializer(EventSerializer):
+class ChemicalEventSerializer(EventSerializer):
+    type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ChemicalEvent
+        fields = "__all__"
+
+    def get_type(self, chemical_event):
+        return "Appl. of " + chemical_event.get_type_display()
+
+
+class UpdateWeatherEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = WeatherEvent
         fields = "__all__"
 
 
-class GeneralEventSerializer(EventSerializer):
+class WeatherEventSerializer(EventSerializer):
+    type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WeatherEvent
+        fields = "__all__"
+
+    def get_type(self, weather_event):
+        return weather_event.get_type_display()
+
+
+class UpdateProductionEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductionEvent
+        fields = "__all__"
+
+
+class ProductionEventSerializer(EventSerializer):
+    type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductionEvent
+        fields = "__all__"
+
+    def get_type(self, production_event):
+        return production_event.get_type_display()
+
+
+class UpdateGeneralEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = GeneralEvent
-        fields = ["id", "name", "observation"]
+        fields = "__all__"
+
+
+class GeneralEventSerializer(EventSerializer):
+    type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = GeneralEvent
+        fields = "__all__"
+
+    def get_type(self, general_event):
+        return general_event.name
 
 
 class HistorySerializer(serializers.ModelSerializer):
     events = serializers.SerializerMethodField()
     certificate_percentage = serializers.SerializerMethodField()
     members = serializers.SerializerMethodField()
+    product = serializers.SerializerMethodField()
 
     class Meta:
         model = History
@@ -51,13 +103,16 @@ class HistorySerializer(serializers.ModelSerializer):
             "earning",
             "members",
             "certificate_percentage",
+            "product",
+            "qr_code",
         ]
         read_only_fields = ["id", "created_at", "updated_at", "certificate_percentage"]
 
+    def get_product(self, history):
+        return history.product.name if history.product else None
+
     def get_events(self, history):
-        return WeatherEventSerializer(
-            history.history_weatherevent_events.all(), many=True
-        ).data
+        return history.get_events()
 
     def get_certificate_percentage(self, history):
         return history.certificate_percentage
@@ -71,3 +126,108 @@ class HistorySerializer(serializers.ModelSerializer):
                     event.created_by.first_name + " " + event.created_by.last_name
                 )
         return members[0:3]
+
+
+class ListHistoryClassSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField()
+    location = serializers.SerializerMethodField()
+    parcel = serializers.SerializerMethodField()
+    date = serializers.SerializerMethodField()
+
+    class Meta:
+        model = HistoryScan
+        fields = [
+            "id",
+            "date",
+            "product",
+            "location",
+            "parcel",
+            "comment",
+        ]
+
+    def get_date(self, history_scan):
+        return history_scan.date.strftime("%m/%d/%Y")
+
+    def get_product(self, history_scan):
+        return (
+            history_scan.history.product.name if history_scan.history.product else None
+        )
+
+    def get_location(self, history_scan):
+        if history_scan.city is None and history_scan.country is None:
+            return "-"
+        elif history_scan.city is not None:
+            return f"{history_scan.city}"
+        elif history_scan.country is not None:
+            return f"{history_scan.country}"
+        return f"{history_scan.city if history_scan.city is not None else '-'}, {history_scan.country if history_scan.country is not None else '-'}"
+
+    def get_parcel(self, history_scan):
+        return history_scan.history.parcel.name if history_scan.history.parcel else None
+
+
+class PublicHistorySerializer(serializers.ModelSerializer):
+    events = serializers.SerializerMethodField()
+    certificate_percentage = serializers.SerializerMethodField()
+    product = serializers.SerializerMethodField()
+    company = serializers.SerializerMethodField()
+    location = serializers.SerializerMethodField()
+    establishment = serializers.SerializerMethodField()
+    parcel = serializers.SerializerMethodField()
+    history_scan = serializers.SerializerMethodField()
+
+    class Meta:
+        model = History
+        fields = [
+            "id",
+            "start_date",
+            "finish_date",
+            "name",
+            "events",
+            "certificate_percentage",
+            "product",
+            "description",
+            "reputation",
+            "company",
+            "location",
+            "establishment",
+            "parcel",
+            "history_scan",
+        ]
+
+    def get_product(self, history):
+        return history.product.name if history.product else None
+
+    def get_events(self, history):
+        return WeatherEventSerializer(
+            history.history_weatherevent_events.all(), many=True
+        ).data
+
+    def get_certificate_percentage(self, history):
+        return history.certificate_percentage
+
+    def get_company(self, history):
+        return history.parcel.establishment.company.name if history.parcel else None
+
+    def get_location(self, history):
+        return f"{history.parcel.establishment.city if history.parcel.establishment.city is not None else '-'}, {history.parcel.establishment.country if history.parcel.establishment.country is not None else '-'}"
+
+    def get_establishment(self, history):
+        return history.parcel.establishment.name if history.parcel else None
+
+    def get_parcel(self, history):
+        return history.parcel.name if history.parcel else None
+
+    def get_history_scan(self, history):
+        return self.context.get("history_scan", None)
+
+
+class HistoryListOptionsSerializer(serializers.ModelSerializer):
+    period = serializers.SerializerMethodField()
+
+    class Meta:
+        model = History
+        fields = ["id", "period"]
+
+    def get_period(self, history):
+        return f"{history.start_date.strftime('%m/%d/%Y')} - {history.finish_date.strftime('%m/%d/%Y')}"

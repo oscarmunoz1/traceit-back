@@ -3,10 +3,23 @@
 import os
 import sys
 
+from dotenv import load_dotenv
+from pathlib import Path
+from decouple import config
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+
+DEBUG = config("DEBUG", default=False, cast=bool)
+
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
+    if DEBUG:
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings.dev")
+    else:
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings.prod")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -18,5 +31,5 @@ def main():
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

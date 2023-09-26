@@ -31,6 +31,12 @@ class User(AbstractUser):
 
     objects = UserManager()
 
+    def __str__(self):
+        return self.get_full_name()
+
+    def get_full_name(self):
+        return self.first_name + " " + self.last_name
+
 
 class WorksIn(models.Model):
     USER_ROLES = [

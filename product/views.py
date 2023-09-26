@@ -1,7 +1,12 @@
-from django.shortcuts import render
-from rest_framework import viewsets, permissions, filters
-from .models import Parcel
-from .serializers import RetrieveParcelSerializer, CreateParcelSerializer
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, permissions, filters, mixins
+from .models import Parcel, Product
+from .serializers import (
+    RetrieveParcelSerializer,
+    CreateParcelSerializer,
+    ProductListSerializer,
+    ProductListOptionsSerializer,
+)
 from history.serializers import HistorySerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,14 +14,17 @@ from rest_framework.response import Response
 
 class ParcelViewSet(viewsets.ModelViewSet):
     queryset = Parcel.objects.all()
-    serializer_class = RetrieveParcelSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.OrderingFilter]
 
     def get_serializer_class(self):
-        if self.action == "list":
-            return RetrieveParcelSerializer
-        return CreateParcelSerializer
+        if (
+            self.action == "create"
+            or self.action == "update"
+            or self.action == "partial_update"
+        ):
+            return CreateParcelSerializer
+        return RetrieveParcelSerializer
 
     @action(detail=True, methods=["get"])
     def current_history(self, request, pk=None):
@@ -28,7 +36,7 @@ class ParcelViewSet(viewsets.ModelViewSet):
     def history(self, request, pk=None):
         parcel = self.get_object()
 
-        histories = parcel.histories.all()
+        histories = parcel.histories.filter(published=True)
         if parcel.current_history is not None:
             return Response(
                 HistorySerializer(
@@ -45,3 +53,37 @@ class ParcelViewSet(viewsets.ModelViewSet):
         if history is not None:
             return Response(HistorySerializer(history).data)
         return Response(status=400)
+
+    def partial_update(self, request, pk=None):
+        parcel = self.get_object()
+        print("entro 12,3,45,5,4,3,")
+        print(request.FILES)
+        print(request.POST)
+        print(request.GET)
+        print(request.data)
+        # print(request.FILES.getlist("images"))
+        parcel_data = request.data
+        serializer = CreateParcelSerializer(
+            parcel, data=parcel_data, partial=True, context={"request": request}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            album = parcel_data.get("album")
+            print(album)
+            print("ese fue el album")
+            if album is not None:
+                print("entro")
+                for image_data in album.get("images"):
+                    print(image_data)
+                    parcel.album.images.create(
+                        image=image_data.get("image"), gallery=parcel.album
+                    )
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+
+class ProductsViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+    queryset = Product.objects.all()
+    serializer_class = ProductListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [filters.OrderingFilter]

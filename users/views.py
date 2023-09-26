@@ -184,7 +184,22 @@ class APILogoutView(APIView):
 
     def post(self, request, *args, **kwargs):
         response = Response({"data": {"user": "ok"}}, status=status.HTTP_200_OK)
-        response.delete_cookie("access")
-        response.delete_cookie("refresh")
-        response.delete_cookie("logged_in")
+        response.delete_cookie(
+            "access",
+            domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+            path="/",
+            samesite="None",
+        )
+        response.delete_cookie(
+            "refresh",
+            domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+            path="/",
+            samesite="None",
+        )
+        response.delete_cookie(
+            "logged_in",
+            domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+            path="/",
+            samesite="None",
+        )
         return response

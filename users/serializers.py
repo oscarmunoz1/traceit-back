@@ -10,12 +10,17 @@ class WorksInSerializer(serializers.ModelSerializer):
     """
     Serializer for WorksIn.
     """
-    id = serializers.ReadOnlyField(source='company.id')
-    name = serializers.ReadOnlyField(source='company.name')
+
+    id = serializers.ReadOnlyField(source="company.id")
+    name = serializers.ReadOnlyField(source="company.name")
 
     class Meta:
         model = WorksIn
-        fields = ('id', 'name', 'role',)
+        fields = (
+            "id",
+            "name",
+            "role",
+        )
 
     def get_picture(self, obj):
         return obj.company.picture.url if obj.company.picture else None
@@ -25,25 +30,27 @@ class BasicUserSerializer(serializers.ModelSerializer):
     """
     Serializer for User.
     """
-    companies = WorksInSerializer(source='worksin_set', many=True)
+
+    companies = WorksInSerializer(source="worksin_set", many=True)
     full_name = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
         fields = [
-            'id',
-            'email',
-            'phone',
-            'full_name',
-            'is_superuser',
-            'companies',
-            'first_name',
-            'last_name',
+            "id",
+            "email",
+            "phone",
+            "full_name",
+            "is_superuser",
+            "companies",
+            "first_name",
+            "last_name",
+            "user_type",
         ]
         read_only_field = [
             "is_active",
         ]
-    
+
     def get_full_name(self, user):
         return user.get_full_name()
 
@@ -55,10 +62,8 @@ class MeSerializer(BasicUserSerializer):
 
     class Meta:
         model = User
-        fields = BasicUserSerializer.Meta.fields + [
-            'username',
-        ]
-        read_only_fields = ['username']
+        fields = BasicUserSerializer.Meta.fields + ["username", "user_type"]
+        read_only_fields = ["username"]
 
 
 class LoginSerializer(TokenObtainPairSerializer):

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import History, ChemicalEvent, WeatherEvent, GeneralEvent
+from .models import History, ChemicalEvent, WeatherEvent, GeneralEvent, HistoryScan
 
 
 class ChemicalEventInline(admin.TabularInline):
@@ -22,9 +22,9 @@ class GeneralEventInline(admin.TabularInline):
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("name", "date")
-    list_filter = ("name", "date", "description")
-    search_fields = ("name", "date", "description")
+    list_display = ("date",)
+    list_filter = ("date", "description")
+    search_fields = ("date", "description")
 
 
 class HistoryAdmin(admin.ModelAdmin):
@@ -40,5 +40,11 @@ class HistoryAdmin(admin.ModelAdmin):
     inlines = [ChemicalEventInline, WeatherEventInline, GeneralEventInline]
 
 
+class HistoryScanAdmin(admin.ModelAdmin):
+    list_display = ("history", "ip_address", "city", "country", "date")
+    list_filter = ("history", "ip_address", "city", "country", "date")
+
+
 admin.site.register(WeatherEvent, EventAdmin)
 admin.site.register(History, HistoryAdmin)
+admin.site.register(HistoryScan, HistoryScanAdmin)

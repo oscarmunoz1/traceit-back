@@ -15,7 +15,9 @@ class Product(models.Model):
 class Parcel(models.Model):
     name = models.CharField(max_length=30)
     description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to="parcel_images", blank=True)
+    album = models.ForeignKey(
+        "common.Gallery", on_delete=models.CASCADE, blank=True, null=True
+    )
     establishment = models.ForeignKey(
         Establishment, on_delete=models.CASCADE, related_name="parcels"
     )
@@ -35,7 +37,7 @@ class Parcel(models.Model):
     )
 
     def __str__(self):
-        return self.name + " - " + self.establishment.name
+        return str(self.id) + " - " + self.name + " - " + self.establishment.name
 
     def finish_current_history(self, history_data):
         if self.current_history is not None:
