@@ -5,6 +5,7 @@ description = ""
 authors = ["Oscar Muñoz <osmunogue@gmail.com>"]
 readme = "README.md"
 packages = [{include = "traceit_back"}]
+python = "^3.9"
 
 [tool.poetry.dependencies]
 python = "^3.11"

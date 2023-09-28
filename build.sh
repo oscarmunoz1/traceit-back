@@ -6,6 +6,9 @@ pip install poetry
 
 poetry env use 3.9
 
+# Add this line to ensure Python 3.9 is in the PATH
+export PATH=$HOME/.poetry/bin:$HOME/.poetry/envs/3.9/bin:$PATH
+
 /opt/render/project/src/.venv/bin/poetry install
 poetry install
 
