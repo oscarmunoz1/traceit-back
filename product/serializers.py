@@ -53,8 +53,8 @@ class CreateParcelSerializer(ModelSerializer):
         parcel = Parcel.objects.create(**validated_data)
         if parcel.album is None:
             parcel.album = Gallery.objects.create()
-        for image_data in images_data:
-            parcel.album.images.create(**image_data)
+        # for image_data in images_data:
+        #     parcel.album.images.create(**image_data)
         return parcel
 
     def update(self, instance, validated_data):
