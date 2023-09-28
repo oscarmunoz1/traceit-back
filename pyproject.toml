@@ -8,7 +8,6 @@ packages = [{include = "traceit_back"}]
 python = "^3.9"
 
 [tool.poetry.dependencies]
-python = "^3.11"
 asgiref = "3.6.0"
 black = "22.12.0"
 certifi = "2022.12.7"
