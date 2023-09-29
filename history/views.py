@@ -32,35 +32,17 @@ from .constants import (
     WEATHER_EVENT_TYPE,
     PRODUCTION_EVENT_TYPE,
     CHEMICAL_EVENT_TYPE,
-    GENERAL_EVENT_TYPE,
+    event_map,
+    ALLOWED_PERIODS,
 )
 
 from product.models import Parcel, Product
 
 
-event_map = {
-    0: WeatherEvent,
-    1: ProductionEvent,
-    2: ChemicalEvent,
-    3: GeneralEvent,
-}
-
-ALLOWED_PERIODS = ["week", "month", "year"]
-
-
 class HistoryViewSet(viewsets.ModelViewSet):
-    # queryset = History.objects.all()
     serializer_class = HistorySerializer
     filter_backends = [filters.OrderingFilter]
     permission_classes = [AllowAny]
-
-    # def get_permissions(self):
-    #     permission_classes = []
-    #     if self.action in ["viewed"]:
-    #         permission_classes = [AllowAny]
-    #     else:
-    #         permission_classes = [IsAuthenticated]
-    #     return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         if self.action == "public_history":

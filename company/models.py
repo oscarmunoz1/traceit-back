@@ -19,10 +19,10 @@ class Company(models.Model):
         verbose_name = _("Company")
         verbose_name_plural = _("Companies")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse("company-detail", kwargs={"id": self.id})
 
 

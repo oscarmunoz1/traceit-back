@@ -27,16 +27,20 @@ class EstablishmentSerializer(ModelSerializer):
         return ParcelBasicSerializer(establishment.parcels.all(), many=True).data
 
 
-class DetailEstablishmentSerializer(ModelSerializer):
-    class Meta:
-        model = Establishment
-        fields = "__all__"
-
-
 class UpdateEstablishmentSerializer(ModelSerializer):
     class Meta:
         model = Establishment
-        fields = "__all__"
+        fields = (
+            "id",
+            "name",
+            "city",
+            "zone",
+            "state",
+            "company",
+            "image",
+            "description",
+            "country",
+        )
 
     def to_representation(self, instance):
         return EstablishmentSerializer(instance).data
@@ -104,11 +108,22 @@ class EstablishmentProductsReputationSerializer(serializers.Serializer):
 
 
 class RetrieveCompanySerializer(ModelSerializer):
+    establishments = serializers.SerializerMethodField()
+
     class Meta:
         model = Company
-        fields = "__all__"
-
-    establishments = serializers.SerializerMethodField()
+        fields = (
+            "id",
+            "name",
+            "tradename",
+            "address",
+            "city",
+            "state",
+            "country",
+            "logo",
+            "description",
+            "establishments",
+        )
 
     def get_establishments(self, company):
         return EstablishmentSerializer(company.establishment_set.all(), many=True).data

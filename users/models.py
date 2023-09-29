@@ -39,11 +39,16 @@ class User(AbstractUser):
 
 
 class WorksIn(models.Model):
+    COMPANY_ADMIN = "CA"
+    DOMAIN_SUPERVISOR = "DS"
+    DOMAIN_WORKER = "DW"
+    DEALER = "DE"
+
     USER_ROLES = [
-        ("CA", _("Company Admin")),
-        ("DS", _("Domain Supervisor")),
-        ("DW", _("Domain Worker")),
-        ("DE", _("Dealer")),
+        (COMPANY_ADMIN, _("Company Admin")),
+        (DOMAIN_SUPERVISOR, _("Domain Supervisor")),
+        (DOMAIN_WORKER, _("Domain Worker")),
+        (DEALER, _("Dealer")),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)

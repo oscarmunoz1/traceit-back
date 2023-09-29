@@ -15,6 +15,7 @@ from .serializers import (
     EstablishmentProductsReputationSerializer,
 )
 from .models import Company, Establishment
+from .constants import ALLOWED_PERIODS
 from users.models import WorksIn
 from product.models import Parcel, Product
 from product.serializers import ProductListOptionsSerializer
@@ -22,8 +23,6 @@ from history.models import History, HistoryScan
 from history.serializers import HistoryListOptionsSerializer
 from reviews.models import Review
 from reviews.serializers import ListReviewSerializer
-
-ALLOWED_PERIODS = ["week", "month", "year"]
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -40,8 +39,9 @@ class CompanyViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         company = serializer.save()
-        company.save()
-        WorksIn.objects.create(user=request.user, company=company, role="FA")
+        WorksIn.objects.create(
+            user=request.user, company=company, role=WorksIn.COMPANY_ADMIN
+        )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -59,8 +59,33 @@ class EstablishmentViewSet(viewsets.ModelViewSet):
             return UpdateEstablishmentSerializer
         return RetrieveEstablishmentSerializer
 
+    def _generate_filter_kwargs(
+        self, period: str, parcel: str, product: str, production=None
+    ) -> dict:
+        filter_kwargs = {}
+        if period == "week":
+            filter_kwargs["date__gte"] = datetime.now() - timedelta(days=7)
+        elif period == "month":
+            filter_kwargs["date__gte"] = datetime.now() - timedelta(days=31)
+        elif period == "year":
+            filter_kwargs["date__gte"] = datetime.now() - timedelta(days=365)
+
+        if parcel is not None:
+            parcel = get_object_or_404(Parcel, pk=parcel)
+            filter_kwargs["parcel__id"] = parcel.id
+
+        if product is not None:
+            product = get_object_or_404(Product, pk=product)
+            filter_kwargs["product__id"] = product.id
+
+        if production is not None:
+            production = get_object_or_404(History, pk=production)
+            filter_kwargs["history__id"] = production.id
+
+        return filter_kwargs
+
     @action(detail=True, methods=["get"])
-    def products(self, request, pk=None):
+    def products(self, request, pk=None) -> Response:
         establishment = get_object_or_404(Establishment, pk=pk)
         products = Product.objects.filter(
             histories__parcel__establishment=establishment,
@@ -76,7 +101,7 @@ class EstablishmentViewSet(viewsets.ModelViewSet):
         )
 
     @action(detail=True, methods=["get"])
-    def histories(self, request, pk=None):
+    def histories(self, request, pk=None) -> Response:
         establishment = get_object_or_404(Establishment, pk=pk)
         parcel = request.query_params.get("parcel", None)
         product = request.query_params.get("product", None)
@@ -88,36 +113,24 @@ class EstablishmentViewSet(viewsets.ModelViewSet):
             )
 
         # Get date kwargs for filter by period
-        filter_kwargs = {}
-        if period == "week":
-            filter_kwargs["finish_date__gte"] = datetime.now() - timedelta(days=7)
-        elif period == "month":
-            filter_kwargs["finish_date__gte"] = datetime.now() - timedelta(days=30)
-        elif period == "year":
-            filter_kwargs["finish_date__gte"] = datetime.now() - timedelta(days=365)
-
-        if parcel is not None:
-            parcel = get_object_or_404(Parcel, pk=parcel)
-            filter_kwargs["parcel__id"] = parcel.id
-
-        if product is not None:
-            product = get_object_or_404(Product, pk=product)
-            filter_kwargs["product__id"] = product.id
+        filter_kwargs = self._generate_filter_kwargs(period, parcel, product)
 
         histories = History.objects.filter(
             parcel__establishment=establishment,
             published=True,
             **filter_kwargs,
         ).distinct()
+
         return Response(HistoryListOptionsSerializer(histories, many=True).data)
 
     @action(detail=True, methods=["get"])
-    def get_charts_data(self, request, pk=None):
+    def get_charts_data(self, request, pk=None) -> Response:
         establishment = get_object_or_404(Establishment, pk=pk)
         parcel = request.query_params.get("parcel", None)
         product = request.query_params.get("product", None)
         period = request.query_params.get("period", None)
         production = request.query_params.get("production", None)
+
         if period is None or period not in ALLOWED_PERIODS:
             return Response(
                 {"error": "Period is required and must be week, month or year"},
@@ -125,25 +138,9 @@ class EstablishmentViewSet(viewsets.ModelViewSet):
             )
 
         # Get date kwargs for filter by period
-        filter_kwargs = {}
-        if period == "week":
-            filter_kwargs["date__gte"] = datetime.now() - timedelta(days=7)
-        elif period == "month":
-            filter_kwargs["date__gte"] = datetime.now() - timedelta(days=31)
-        elif period == "year":
-            filter_kwargs["date__gte"] = datetime.now() - timedelta(days=365)
-
-        if parcel is not None:
-            parcel = get_object_or_404(Parcel, pk=parcel)
-            filter_kwargs["history__parcel__id"] = parcel.id
-
-        if product is not None:
-            product = get_object_or_404(Product, pk=product)
-            filter_kwargs["history__product__id"] = product.id
-
-        if production is not None:
-            production = get_object_or_404(History, pk=production)
-            filter_kwargs["history__id"] = production.id
+        filter_kwargs = self._generate_filter_kwargs(
+            period, parcel, product, production
+        )
 
         series_result = []
         if period == "week":
@@ -253,7 +250,7 @@ class EstablishmentViewSet(viewsets.ModelViewSet):
         )
 
     @action(detail=True, methods=["get"])
-    def products_reputation(self, request, pk=None):
+    def products_reputation(self, request, pk=None) -> Response:
         establishment = get_object_or_404(Establishment, pk=pk)
         parcel = request.query_params.get("parcel", None)
         product = request.query_params.get("product", None)
@@ -266,25 +263,9 @@ class EstablishmentViewSet(viewsets.ModelViewSet):
             )
 
         # Get date kwargs for filter by period
-        filter_kwargs = {}
-        if period == "week":
-            filter_kwargs["date__gte"] = datetime.now() - timedelta(days=7)
-        elif period == "month":
-            filter_kwargs["date__gte"] = datetime.now() - timedelta(days=31)
-        elif period == "year":
-            filter_kwargs["date__gte"] = datetime.now() - timedelta(days=365)
-
-        if parcel is not None:
-            parcel = get_object_or_404(Parcel, pk=parcel)
-            filter_kwargs["production__parcel__id"] = parcel.id
-
-        if product is not None:
-            product = get_object_or_404(Product, pk=product)
-            filter_kwargs["production__product__id"] = product.id
-
-        if production is not None:
-            production = get_object_or_404(History, pk=production)
-            filter_kwargs["production__id"] = production.id
+        filter_kwargs = self._generate_filter_kwargs(
+            period, parcel, product, production
+        )
 
         series_result = []
         options_result = []
@@ -312,7 +293,7 @@ class EstablishmentViewSet(viewsets.ModelViewSet):
         )
 
     @action(detail=True, methods=["get"])
-    def last_reviews(self, request, pk=None):
+    def last_reviews(self, request, pk=None) -> Response:
         establishment = get_object_or_404(Establishment, pk=pk)
         reviews = Review.objects.filter(
             production__parcel__establishment=establishment,
@@ -323,7 +304,7 @@ class EstablishmentViewSet(viewsets.ModelViewSet):
         )
 
     @action(detail=True, methods=["get"])
-    def rating_reviews_percentage(self, request, pk=None):
+    def rating_reviews_percentage(self, request, pk=None) -> Response:
         establishment = get_object_or_404(Establishment, pk=pk)
         # Return percentage of positive, neutral and negative reviews for the establishment
 

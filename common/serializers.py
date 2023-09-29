@@ -17,8 +17,6 @@ class GallerySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        print("entro si si si imagenes")
-        print(self.context.get("request").data)
         images_data = self.context.get("request").data.get("images")
         gallery = Gallery.objects.create(**validated_data)
         if images_data is not None:
@@ -27,8 +25,6 @@ class GallerySerializer(serializers.ModelSerializer):
         return gallery
 
     def update(self, instance, validated_data):
-        print("entro si si si imagenes")
-        print(self.context.get("request").data)
         images_data = self.context.get("request").data.get("images")
         instance.name = validated_data.get("name", instance.name)
         instance.save()
