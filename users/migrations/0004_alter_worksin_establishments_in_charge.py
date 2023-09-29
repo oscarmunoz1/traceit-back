@@ -4,9 +4,8 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ("company", "0005_alter_company_tradename"),
+        ("company", "0002_alter_company_options_alter_establishment_options_and_more"),
         ("users", "0003_alter_worksin_role"),
     ]
 

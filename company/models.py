@@ -9,7 +9,7 @@ class Company(models.Model):
     address = models.CharField(max_length=30)
     city = models.CharField(max_length=30)
     state = models.CharField(max_length=30)
-    country = models.CharField(max_length=30)
+    country = models.CharField(max_length=30, blank=True, null=True)
     fiscal_id = models.CharField(max_length=30, help_text="RUT", blank=True, null=True)
     logo = models.ImageField(upload_to="company_logos", blank=True)
     description = models.TextField(blank=True, null=True)

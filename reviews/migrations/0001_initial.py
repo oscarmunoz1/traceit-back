@@ -6,12 +6,11 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("history", "0010_historyscan_comment"),
+        ("history", "0002_history_lot_id_history_parcel_history_product_and_more"),
     ]
 
     operations = [

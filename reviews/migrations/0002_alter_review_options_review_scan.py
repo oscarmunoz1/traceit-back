@@ -5,9 +5,8 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ("history", "0010_historyscan_comment"),
+        ("history", "0002_history_lot_id_history_parcel_history_product_and_more"),
         ("reviews", "0001_initial"),
     ]
 

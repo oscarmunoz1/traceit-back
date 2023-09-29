@@ -14,7 +14,7 @@ class History(models.Model):
     name = models.CharField(max_length=30, blank=True, null=True)
     start_date = models.DateTimeField(null=True, blank=True)
     finish_date = models.DateTimeField(null=True, blank=True)
-    published = models.BooleanField(default=False)
+    published = models.BooleanField(default=False, blank=True)
     earning = models.FloatField(default=0)
     lot_id = models.CharField(max_length=30, blank=True, null=True)
     description = models.TextField(blank=True, null=True)

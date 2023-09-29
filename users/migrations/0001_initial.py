@@ -7,11 +7,10 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ("company", "0002_alter_company_description"),
+        ("company", "0002_alter_company_options_alter_establishment_options_and_more"),
         ("auth", "0012_alter_user_first_name_max_length"),
     ]
 
