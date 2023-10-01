@@ -239,12 +239,54 @@ click = ">=8.0.0"
 mypy-extensions = ">=0.4.3"
 pathspec = ">=0.9.0"
 platformdirs = ">=2"
+tomli = {version = ">=1.1.0", markers = "python_full_version < \"3.11.0a7\""}
+typing-extensions = {version = ">=3.10.0.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
 d = ["aiohttp (>=3.7.4)"]
 jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
 uvloop = ["uvloop (>=0.15.2)"]
+
+[[package]]
+name = "boto3"
+version = "1.28.57"
+description = "The AWS SDK for Python"
+category = "main"
+optional = false
+python-versions = ">= 3.7"
+files = [
+    {file = "boto3-1.28.57-py3-none-any.whl", hash = "sha256:5ddf24cf52c7fb6aaa332eaa08ae8c2afc8f2d1e8860680728533dd573904e32"},
+    {file = "boto3-1.28.57.tar.gz", hash = "sha256:e2d2824ba6459b330d097e94039a9c4f96ae3f4bcdc731d620589ad79dcd16d3"},
+]
+
+[package.dependencies]
+botocore = ">=1.31.57,<1.32.0"
+jmespath = ">=0.7.1,<2.0.0"
+s3transfer = ">=0.7.0,<0.8.0"
+
+[package.extras]
+crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
+
+[[package]]
+name = "botocore"
+version = "1.31.57"
+description = "Low-level, data-driven core of boto 3."
+category = "main"
+optional = false
+python-versions = ">= 3.7"
+files = [
+    {file = "botocore-1.31.57-py3-none-any.whl", hash = "sha256:af006248276ff8e19e3ec7214478f6257035eb40aed865e405486500471ae71b"},
+    {file = "botocore-1.31.57.tar.gz", hash = "sha256:301436174635bec739b225b840fc365ca00e5c1a63e5b2a19ee679d204e01b78"},
+]
+
+[package.dependencies]
+jmespath = ">=0.7.1,<2.0.0"
+python-dateutil = ">=2.1,<3.0.0"
+urllib3 = ">=1.25.4,<1.27"
+
+[package.extras]
+crt = ["awscrt (==0.16.26)"]
 
 [[package]]
 name = "certifi"
@@ -518,6 +560,30 @@ files = [
 Django = ">=3.2"
 
 [[package]]
+name = "django-storages"
+version = "1.14.1"
+description = "Support for many storage backends in Django"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "django-storages-1.14.1.tar.gz", hash = "sha256:a2c327d67792eec04c7f5f5bb2900b21f426de8a3a811cea85fac7904bdccf36"},
+    {file = "django_storages-1.14.1-py3-none-any.whl", hash = "sha256:18cb6c305fbb2f114c11b5b7b647b6271aa251972dcd4a5651b9cee2b0bd3a8a"},
+]
+
+[package.dependencies]
+Django = ">=3.2"
+
+[package.extras]
+azure = ["azure-storage-blob (>=12)"]
+boto3 = ["boto3 (>=1.4.4)"]
+dropbox = ["dropbox (>=7.2.1)"]
+google = ["google-cloud-storage (>=1.27)"]
+libcloud = ["apache-libcloud"]
+s3 = ["boto3 (>=1.4.4)"]
+sftp = ["paramiko (>=1.15)"]
+
+[[package]]
 name = "djangorestframework"
 version = "3.14.0"
 description = "Web APIs for Django, made easy."
@@ -557,6 +623,21 @@ doc = ["Sphinx (>=1.6.5,<2)", "sphinx-rtd-theme (>=0.1.9)"]
 lint = ["flake8", "isort", "pep8"]
 python-jose = ["python-jose (==3.3.0)"]
 test = ["cryptography", "pytest", "pytest-cov", "pytest-django", "pytest-xdist", "tox"]
+
+[[package]]
+name = "exceptiongroup"
+version = "1.1.3"
+description = "Backport of PEP 654 (exception groups)"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "exceptiongroup-1.1.3-py3-none-any.whl", hash = "sha256:343280667a4585d195ca1cf9cef84a4e178c4b6cf2274caef9859782b567d5e3"},
+    {file = "exceptiongroup-1.1.3.tar.gz", hash = "sha256:097acd85d473d75af5bb98e41b61ff7fe35efe6675e4f9370ec6ec5126d160e9"},
+]
+
+[package.extras]
+test = ["pytest (>=6)"]
 
 [[package]]
 name = "executing"
@@ -711,6 +792,7 @@ appnope = {version = "*", markers = "sys_platform == \"darwin\""}
 backcall = "*"
 colorama = {version = "*", markers = "sys_platform == \"win32\""}
 decorator = "*"
+exceptiongroup = {version = "*", markers = "python_version < \"3.11\""}
 jedi = ">=0.16"
 matplotlib-inline = "*"
 pexpect = {version = ">4.3", markers = "sys_platform != \"win32\""}
@@ -719,6 +801,7 @@ prompt-toolkit = ">=3.0.30,<3.0.37 || >3.0.37,<3.1.0"
 pygments = ">=2.4.0"
 stack-data = "*"
 traitlets = ">=5"
+typing-extensions = {version = "*", markers = "python_version < \"3.10\""}
 
 [package.extras]
 all = ["black", "curio", "docrepr", "exceptiongroup", "ipykernel", "ipyparallel", "ipywidgets", "matplotlib", "matplotlib (!=3.2.0)", "nbconvert", "nbformat", "notebook", "numpy (>=1.21)", "pandas", "pytest (<7)", "pytest (<7.1)", "pytest-asyncio", "qtconsole", "setuptools (>=18.5)", "sphinx (>=1.3)", "sphinx-rtd-theme", "stack-data", "testpath", "trio", "typing-extensions"]
@@ -752,6 +835,18 @@ parso = ">=0.8.3,<0.9.0"
 docs = ["Jinja2 (==2.11.3)", "MarkupSafe (==1.1.1)", "Pygments (==2.8.1)", "alabaster (==0.7.12)", "babel (==2.9.1)", "chardet (==4.0.0)", "commonmark (==0.8.1)", "docutils (==0.17.1)", "future (==0.18.2)", "idna (==2.10)", "imagesize (==1.2.0)", "mock (==1.0.1)", "packaging (==20.9)", "pyparsing (==2.4.7)", "pytz (==2021.1)", "readthedocs-sphinx-ext (==2.1.4)", "recommonmark (==0.5.0)", "requests (==2.25.1)", "six (==1.15.0)", "snowballstemmer (==2.1.0)", "sphinx (==1.8.5)", "sphinx-rtd-theme (==0.4.3)", "sphinxcontrib-serializinghtml (==1.1.4)", "sphinxcontrib-websupport (==1.2.4)", "urllib3 (==1.26.4)"]
 qa = ["flake8 (==5.0.4)", "mypy (==0.971)", "types-setuptools (==67.2.0.1)"]
 testing = ["Django (<3.1)", "attrs", "colorama", "docopt", "pytest (<7.0.0)"]
+
+[[package]]
+name = "jmespath"
+version = "1.0.1"
+description = "JSON Matching Expressions"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "jmespath-1.0.1-py3-none-any.whl", hash = "sha256:02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980"},
+    {file = "jmespath-1.0.1.tar.gz", hash = "sha256:90261b206d6defd58fdd5e85f478bf633a2901798906be2ad389150c5c60edbe"},
+]
 
 [[package]]
 name = "matplotlib-inline"
@@ -1210,6 +1305,21 @@ docs = ["sphinx (>=4.5.0,<5.0.0)", "sphinx-rtd-theme", "zope.interface"]
 tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
 
 [[package]]
+name = "python-dateutil"
+version = "2.8.2"
+description = "Extensions to the standard Python datetime module"
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
+files = [
+    {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},
+    {file = "python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},
+]
+
+[package.dependencies]
+six = ">=1.5"
+
+[[package]]
 name = "python-decouple"
 version = "3.8"
 description = "Strict separation of settings from code."
@@ -1328,6 +1438,24 @@ requests = ">=2.0.0"
 
 [package.extras]
 rsa = ["oauthlib[signedtoken] (>=3.0.0)"]
+
+[[package]]
+name = "s3transfer"
+version = "0.7.0"
+description = "An Amazon S3 Transfer Manager"
+category = "main"
+optional = false
+python-versions = ">= 3.7"
+files = [
+    {file = "s3transfer-0.7.0-py3-none-any.whl", hash = "sha256:10d6923c6359175f264811ef4bf6161a3156ce8e350e705396a7557d6293c33a"},
+    {file = "s3transfer-0.7.0.tar.gz", hash = "sha256:fd3889a66f5fe17299fe75b82eae6cf722554edca744ca5d5fe308b104883d2e"},
+]
+
+[package.dependencies]
+botocore = ">=1.12.36,<2.0a.0"
+
+[package.extras]
+crt = ["botocore[crt] (>=1.20.29,<2.0a.0)"]
 
 [[package]]
 name = "setuptools"
@@ -1576,5 +1704,5 @@ multidict = ">=4.0"
 
 [metadata]
 lock-version = "2.0"
-python-versions = "^3.11"
-content-hash = "940e280d6d1914bf4834a19f682ad4b907c56e272f670412965c1700e96ffaf5"
+python-versions = "^3.9"
+content-hash = "2ba794bbfcce758204bf4df17bcbdf4f8a28ce351c9adae387e0730adce86495"
