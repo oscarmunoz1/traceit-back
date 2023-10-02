@@ -233,7 +233,7 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # The absolute path to the directory where collectstatic will collect static files for deployment.
-STATIC_ROOT = "/ubuntu/staticfiles/"
+STATIC_ROOT = "/home/ubuntu/traceit-back/staticfiles/"
 
 # The URL to use when referring to static files (where they will be served from)
 STATIC_URL = "/static/"
