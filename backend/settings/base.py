@@ -140,23 +140,62 @@ DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 
 LOGGING = {
+    # Version del logging
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {
-        "file": {
-            "level": "ERROR",
-            "class": "logging.FileHandler",
-            "filename": "/var/log/django/error.log",
+    "formatters": {
+        "verbose": {
+            "format": "[%(asctime)s] %(levelname)s | %(name)s | "
+            "%(module)s | %(funcName)s | %(lineno)d | %(message)s",
+            "datefmt": "%d/%b/%Y %H:%M:%S",
         },
     },
+    "filters": {
+        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"},
+    },
+    # Se definen dos handlers para develop: Console y File.
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+            "filename": "/var/log/django/django.log",
+        },
+        "null": {
+            "class": "logging.NullHandler",
+        },
+    },
+    # Se redefinen dos loggers para satisfacer los requisitos
     "loggers": {
+        "backend": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
         "django": {
-            "handlers": ["file"],
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "django.db.backends": {
+            "handlers": ["console"],
             "level": "ERROR",
+            "propagate": False,
+        },
+        "django.security.DisallowedHost": {
+            "handlers": ["null"],
+            "propagate": False,
+        },
+        "": {
+            "handlers": [
+                "console",
+            ],
+            "level": "DEBUG",
             "propagate": True,
         },
     },
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
