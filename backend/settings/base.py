@@ -159,7 +159,6 @@ LOGGING = {
             "level": "INFO",
             "class": "logging.StreamHandler",
             "formatter": "verbose",
-            "filename": "/var/log/django/django.log",
         },
         "null": {
             "class": "logging.NullHandler",
