@@ -233,12 +233,12 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # The absolute path to the directory where collectstatic will collect static files for deployment.
-STATIC_ROOT = BASE_DIR / "staticfiles" / "static"
+STATIC_ROOT = BASE_DIR.parent / "static"
 
 # The URL to use when referring to static files (where they will be served from)
 STATIC_URL = "/static/"
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "staticfiles/static")]
+STATICFILES_DIRS = [os.path.join(BASE_DIR.parent, "static")]
 
 # Simplified static file serving.
 # https://pypi.org/project/whitenoise/
