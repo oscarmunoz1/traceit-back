@@ -238,7 +238,7 @@ STATIC_ROOT = BASE_DIR.parent / "static"
 # The URL to use when referring to static files (where they will be served from)
 STATIC_URL = "/static/"
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR.parent, "static")]
+# STATICFILES_DIRS = [os.path.join(BASE_DIR.parent, "static")]
 
 # Simplified static file serving.
 # https://pypi.org/project/whitenoise/
