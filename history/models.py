@@ -61,7 +61,7 @@ class History(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
-        url = f"{settings.BASE_TRACEIT_URL}history/{self.id}"
+        url = f"{settings.BASE_TRACEIT_URL}production/{self.id}"
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
