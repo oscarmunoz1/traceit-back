@@ -6,7 +6,11 @@ from backend.settings.base import *
 ALLOWED_HOSTS = ["api-us-east-1.traceit.io"]
 
 
-CSRF_TRUSTED_ORIGINS = [".traceit.io", "traceit.io", "api-us-east-1.traceit.io"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.traceit.io",
+    "https://traceit.io",
+    "https://api-us-east-1.traceit.io",
+]
 
 CORS_ORIGIN_ALLOW_ALL = True
 

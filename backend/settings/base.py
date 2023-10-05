@@ -106,25 +106,14 @@ GEOIP_PATH = os.path.join(Path(__file__).resolve().parent.parent.parent, "geoip_
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": config("DATABASE_NAME"),
-#         "USER": config("DATABASE_USER"),
-#         "PASSWORD": config("DATABASE_PASSWORD"),
-#         "HOST": config("DATABASE_HOST"),
-#         "PORT": config("DATABASE_PORT"),
-#     }
-# }
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "traceitdb",
-        "USER": "postgres",
-        "PASSWORD": "PlazaFlores_",
-        "HOST": "traceit-database.cox3o9tj0v96.us-east-2.rds.amazonaws.com",
-        "PORT": "5432",
+        "NAME": config("DATABASE_NAME"),
+        "USER": config("DATABASE_USER"),
+        "PASSWORD": config("DATABASE_PASSWORD"),
+        "HOST": config("DATABASE_HOST"),
+        "PORT": config("DATABASE_PORT"),
     }
 }
 
@@ -237,8 +226,6 @@ STATIC_ROOT = BASE_DIR.parent / "static"
 
 # The URL to use when referring to static files (where they will be served from)
 STATIC_URL = "/static/"
-
-# STATICFILES_DIRS = [os.path.join(BASE_DIR.parent, "static")]
 
 # Simplified static file serving.
 # https://pypi.org/project/whitenoise/
