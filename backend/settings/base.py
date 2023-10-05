@@ -23,6 +23,10 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
+BASE_TRACEIT_URL = config("BASE_TRACEIT_URL")
+
+BASE_APP_URL = config("BASE_APP_URL")
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("SECRET_KEY")
 

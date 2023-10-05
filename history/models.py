@@ -1,4 +1,5 @@
 import qrcode
+from django.conf import settings
 from io import BytesIO
 from django.db import models
 from django.db.models import Avg
@@ -60,7 +61,7 @@ class History(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
-        url = f"https://localhost:3000/history/{self.id}"
+        url = f"{settings.BASE_TRACEIT_URL}history/{self.id}"
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
