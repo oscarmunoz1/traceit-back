@@ -69,6 +69,9 @@ class HistoryViewSet(viewsets.ModelViewSet):
 
         history = get_object_or_404(queryset, pk=pk)
         ip_address = request.META.get("REMOTE_ADDR", None)
+        print("ip_address::::::")
+        print(ip_address)
+        print(request.META)
 
         city = None
         country = None
