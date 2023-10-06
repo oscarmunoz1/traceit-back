@@ -68,9 +68,21 @@ class HistoryViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
 
         history = get_object_or_404(queryset, pk=pk)
-        ip_address = request.META.get("REMOTE_ADDR", None)
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        print("x_forwarded_for::::::")
+        print(x_forwarded_for)
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(",")[0]
+        else:
+            print("request.META.get('REMOTE_ADDR')::::::")
+            print(request.META.get("REMOTE_ADDR"))
+            ip = request.META.get("X-Real-IP")
+        print("ip::::::")
+        print(ip)
+        ip_address = request.META.get("X-Real-IP", None)
         print("ip_address::::::")
         print(ip_address)
+        print("-----")
         print(request.META)
 
         city = None
