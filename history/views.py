@@ -69,21 +69,10 @@ class HistoryViewSet(viewsets.ModelViewSet):
 
         history = get_object_or_404(queryset, pk=pk)
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-        print("x_forwarded_for::::::")
-        print(x_forwarded_for)
-        print(request.META.get("HTTP_X_REAL_IP", None))
-        print("--------")
         if x_forwarded_for:
             ip_address = x_forwarded_for.split(",")[0]
         else:
-            print("request.META.get('REMOTE_ADDR')::::::")
-            print(request.META.get("REMOTE_ADDR"))
-            ip_address = request.META.get("HTTP_X_REAL_IP", None)
-        print("ip::::::")
-        print("ip_address::::::")
-        print(ip_address)
-        print("-----")
-        print(request.META)
+            ip_address = request.META.get("HTTP_X_REAL_IP")
 
         city = None
         country = None
@@ -91,10 +80,9 @@ class HistoryViewSet(viewsets.ModelViewSet):
         if ip_address:
             try:
                 g = GeoIP2()
-                city = g.city(ip_address)
-                country = g.country(ip_address)
+                city = g.city(ip_address).get("city")
+                country = g.country(ip_address).get("country_name")
             except Exception as e:
-                print(e)
                 pass
 
         history_scan = HistoryScan.objects.create(
