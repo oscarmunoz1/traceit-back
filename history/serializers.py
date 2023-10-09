@@ -39,6 +39,53 @@ class UpdateWeatherEventSerializer(serializers.ModelSerializer):
         model = WeatherEvent
         fields = "__all__"
 
+    def to_internal_value(self, data):
+        type = data.get("type", None)
+        if type is None:
+            raise serializers.ValidationError(
+                {"type": ["This field is required."]}, code="required"
+            )
+        data = data.copy()
+        extra_data = {}
+        if type == WeatherEvent.FROST:
+            extra_data["lower_temperature"] = data.pop("lower_temperature", None)
+            extra_data["way_of_protection"] = data.pop("way_of_protection", None)
+        elif type == WeatherEvent.DROUGHT:
+            extra_data["water_deficit"] = data.pop("water_deficit", None)
+        elif type == WeatherEvent.HAILSTORM:
+            extra_data["weight"] = data.pop("weight", None)
+            extra_data["diameter"] = data.pop("diameter", None)
+            extra_data["duration"] = data.pop("duration", None)
+            extra_data["way_of_protection"] = data.pop("way_of_protection", None)
+        elif type == WeatherEvent.HIGH_TEMPERATURE:
+            extra_data["highest_temperature"] = data.pop("highest_temperature", None)
+            extra_data["start_date"] = data.pop("start_date", None)
+            extra_data["end_date"] = data.pop("end_date", None)
+        internal_value = super().to_internal_value(data)
+        internal_value.extra_data = extra_data
+
+        return internal_value
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        type = data.get("type", None)
+        if type == WeatherEvent.FROST:
+            data["lower_temperature"] = instance.extra_data["lower_temperature"]
+            data["way_of_protection"] = instance.extra_data["way_of_protection"]
+        elif type == WeatherEvent.DROUGHT:
+            data["water_deficit"] = instance.extra_data["water_deficit"]
+        elif type == WeatherEvent.HAILSTORM:
+            data["weight"] = instance.extra_data["weight"]
+            data["diameter"] = instance.extra_data["diameter"]
+            data["duration"] = instance.extra_data["duration"]
+            data["way_of_protection"] = instance.extra_data["way_of_protection"]
+        elif type == WeatherEvent.HIGH_TEMPERATURE:
+            data["highest_temperature"] = instance.extra_data["highest_temperature"]
+            data["start_date"] = instance.extra_data["start_date"]
+            data["end_date"] = instance.extra_data["end_date"]
+        data.pop("extra_data")
+        return data
+
 
 class WeatherEventSerializer(EventSerializer):
     type = serializers.SerializerMethodField()

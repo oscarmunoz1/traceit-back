@@ -12,7 +12,17 @@ from product.models import Parcel
 
 
 class History(models.Model):
+    ORCHARD = "OR"
+    GARDEN = "GA"
+
+    HISTORY_TYPES = (
+        (ORCHARD, "Orchard"),
+        (GARDEN, "Garden"),
+    )
+
     name = models.CharField(max_length=30, blank=True, null=True)
+    type = models.CharField(max_length=2, choices=HISTORY_TYPES, blank=True, null=True)
+    extra_data = models.JSONField(blank=True, null=True)
     start_date = models.DateTimeField(null=True, blank=True)
     finish_date = models.DateTimeField(null=True, blank=True)
     published = models.BooleanField(default=False, blank=True)
@@ -44,9 +54,14 @@ class History(models.Model):
             "[ "
             + str(self.start_date.strftime("%m/%d/%Y"))
             + " - "
-            + str(self.finish_date.strftime("%m/%d/%Y"))
-            if self.finish_date
-            else "" + " ]" + " - " + self.product.name
+            + (
+                str(self.finish_date.strftime("%m/%d/%Y"))
+                if self.finish_date
+                else "present"
+            )
+            + " ]"
+            + " - "
+            + self.product.name
             if self.product
             else ""
         )
@@ -171,7 +186,8 @@ class CommonEvent(models.Model):
 class WeatherEvent(CommonEvent):
     FROST = "FR"
     DROUGHT = "DR"
-    HEAT_WAVE = "HW"
+    HAILSTORM = "HA"
+    HIGH_TEMPERATURE = "HT"
     TROPICAL_STORM = "TS"
     HIGH_WINDS = "HW"
     HIGH_HUMIDITY = "HH"
@@ -180,7 +196,8 @@ class WeatherEvent(CommonEvent):
     WEATHER_EVENTS = (
         (FROST, "Frost"),
         (DROUGHT, "Drought"),
-        (HEAT_WAVE, "Heat Wave"),
+        (HAILSTORM, "Hailstorm"),
+        (HIGH_TEMPERATURE, "High Temperature"),
         (TROPICAL_STORM, "Tropical Storm"),
         (HIGH_WINDS, "High Winds"),
         (HIGH_HUMIDITY, "High Humidity"),
@@ -191,10 +208,8 @@ class WeatherEvent(CommonEvent):
         max_length=2,
         choices=WEATHER_EVENTS,
     )
-    temperature = models.FloatField(default=0)
-    humidity = models.FloatField(default=0)
-    time_period = models.CharField(max_length=30, blank=True, null=True)
     observation = models.TextField(blank=True, null=True)
+    extra_data = models.JSONField(blank=True, null=True)
 
 
 class ChemicalEvent(CommonEvent):

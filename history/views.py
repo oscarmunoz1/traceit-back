@@ -55,8 +55,23 @@ class HistoryViewSet(viewsets.ModelViewSet):
         parcel = Parcel.objects.get(id=data["parcel"])
         product = data["product"]
         obj, created = Product.objects.get_or_create(name=product["name"])
+        type = data["type"]
+        age_of_plants = data["age_of_plants"]
+        number_of_plants = data["number_of_plants"]
+        soil_ph = data["soil_ph"]
+        is_outdoor = data["is_outdoor"]
+        extra_data = {
+            "age_of_plants": age_of_plants,
+            "number_of_plants": number_of_plants,
+            "soil_ph": soil_ph,
+            "is_outdoor": is_outdoor,
+        }
         history = History.objects.create(
-            start_date=data["date"], parcel=parcel, product=obj
+            start_date=data["date"],
+            parcel=parcel,
+            product=obj,
+            extra_data=extra_data,
+            type=type,
         )
         parcel.current_history = history
         parcel.save()
