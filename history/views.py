@@ -37,12 +37,12 @@ from .constants import (
 )
 
 from product.models import Parcel, Product
+from backend.permissions import CompanyNestedViewSet
 
 
-class HistoryViewSet(viewsets.ModelViewSet):
+class HistoryViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
     serializer_class = HistorySerializer
     filter_backends = [filters.OrderingFilter]
-    permission_classes = [AllowAny]
 
     def get_queryset(self):
         if self.action == "public_history":
@@ -79,6 +79,7 @@ class HistoryViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=True, methods=["get"])
+    @permission_classes([AllowAny])
     def public_history(self, request, pk=None):
         queryset = self.get_queryset()
 
@@ -113,12 +114,12 @@ class HistoryViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class HistoryScanViewSet(viewsets.ModelViewSet):
+class HistoryScanViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
     queryset = HistoryScan.objects.all()
     serializer_class = ListHistoryClassSerializer
-    permission_classes = [AllowAny]
 
     @action(detail=True, methods=["post"])
+    @permission_classes([AllowAny])
     def comment(self, request, pk=None):
         history_scan = get_object_or_404(HistoryScan, pk=pk)
         comment = request.data.get("comment", None)
@@ -131,8 +132,9 @@ class HistoryScanViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"])
-    def list_scans_by_establishment(self, request):
-        establishment = request.query_params.get("establishment", None)
+    def list_scans_by_establishment(
+        self, request, parcel_pk=None, company_pk=None, establishment_pk=None
+    ):
         parcel = request.query_params.get("parcel", None)
         product = request.query_params.get("product", None)
         period = request.query_params.get("period", None)
@@ -143,7 +145,7 @@ class HistoryScanViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if establishment is None:
+        if self.establishment is None:
             return Response(
                 {"error": "Establishment is required"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -160,7 +162,7 @@ class HistoryScanViewSet(viewsets.ModelViewSet):
 
         # Get last 9 scans from the establishment
         history_scans = HistoryScan.objects.filter(
-            history__parcel__establishment__id=establishment,
+            history__parcel__establishment=self.establishment,
             **date_kwargs,
         ).order_by("-date")
         if parcel is not None:
@@ -176,7 +178,7 @@ class HistoryScanViewSet(viewsets.ModelViewSet):
         )
 
 
-class EventViewSet(viewsets.ModelViewSet):
+class EventViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     filter_backends = [filters.OrderingFilter]
 

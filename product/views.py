@@ -10,11 +10,11 @@ from .serializers import (
 from history.serializers import HistorySerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from backend.permissions import CompanyNestedViewSet
 
 
-class ParcelViewSet(viewsets.ModelViewSet):
+class ParcelViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
     queryset = Parcel.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.OrderingFilter]
 
     def get_serializer_class(self):
@@ -27,13 +27,22 @@ class ParcelViewSet(viewsets.ModelViewSet):
         return RetrieveParcelSerializer
 
     @action(detail=True, methods=["get"])
-    def current_history(self, request, pk=None):
-        parcel = self.get_object()
+    def current_history(
+        self, request, pk=None, parcel_pk=None, company_pk=None, establishment_pk=None
+    ):
+        establishments = self.company.establishment_set.all()
+        parcel = get_object_or_404(
+            Parcel,
+            id=pk,
+            establishment__in=establishments.all(),
+        )
         current_history = parcel.current_history
         return Response(HistorySerializer(current_history).data)
 
     @action(detail=True, methods=["get"])
-    def history(self, request, pk=None):
+    def history(
+        self, request, pk=None, parcel_pk=None, company_pk=None, establishment_pk=None
+    ):
         parcel = self.get_object()
 
         histories = parcel.histories.filter(published=True)
@@ -46,7 +55,9 @@ class ParcelViewSet(viewsets.ModelViewSet):
         return Response(HistorySerializer(histories, many=True).data)
 
     @action(detail=True, methods=["post"])
-    def finish_history(self, request, pk=None):
+    def finish_history(
+        self, request, pk=None, parcel_pk=None, company_pk=None, establishment_pk=None
+    ):
         parcel = self.get_object()
         history_data = request.data
         history = parcel.finish_current_history(history_data)
@@ -54,14 +65,8 @@ class ParcelViewSet(viewsets.ModelViewSet):
             return Response(HistorySerializer(history).data)
         return Response(status=400)
 
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request, pk=None, company_pk=None, establishment_pk=None):
         parcel = self.get_object()
-        print("entro 12,3,45,5,4,3,")
-        print(request.FILES)
-        print(request.POST)
-        print(request.GET)
-        print(request.data)
-        # print(request.FILES.getlist("images"))
         parcel_data = request.data
         serializer = CreateParcelSerializer(
             parcel, data=parcel_data, partial=True, context={"request": request}
@@ -69,12 +74,8 @@ class ParcelViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.save()
             album = parcel_data.get("album")
-            print(album)
-            print("ese fue el album")
             if album is not None:
-                print("entro")
                 for image_data in album.get("images"):
-                    print(image_data)
                     parcel.album.images.create(
                         image=image_data.get("image"), gallery=parcel.album
                     )
@@ -82,8 +83,7 @@ class ParcelViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=400)
 
 
-class ProductsViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+class ProductsViewSet(CompanyNestedViewSet, mixins.ListModelMixin):
     queryset = Product.objects.all()
     serializer_class = ProductListSerializer
-    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.OrderingFilter]
