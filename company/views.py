@@ -165,7 +165,7 @@ class EstablishmentViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
                 history__parcel__establishment=establishment,
                 history__published=True,
                 **filter_kwargs,
-            )
+            ).distinct()
             histories = histories.annotate(day_of_week=ExtractWeekDay("date"))
             histories = histories.values("day_of_week")
             histories = histories.annotate(count=Count("id"))
@@ -195,7 +195,7 @@ class EstablishmentViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
                 history__parcel__establishment=establishment,
                 history__published=True,
                 **filter_kwargs,
-            )
+            ).distinct()
             histories = histories.annotate(
                 day_of_month=ExtractDay("date"), month=ExtractMonth("date")
             )
@@ -231,7 +231,7 @@ class EstablishmentViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
                 history__parcel__establishment=establishment,
                 history__published=True,
                 **filter_kwargs,
-            )
+            ).distinct()
             histories = histories.annotate(month=ExtractMonth("date"))
             histories = histories.values("month")
             histories = histories.annotate(count=Count("id"))
@@ -303,7 +303,7 @@ class EstablishmentViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
         reviews = Review.objects.filter(
             production__parcel__establishment=establishment,
             **filter_kwargs,
-        )
+        ).distinct()
 
         reviews = reviews.values("production__product__name")
         reviews = reviews.annotate(avg_rating=Avg("rating"))
