@@ -57,8 +57,16 @@ class RetrieveEstablishmentSerializer(ModelSerializer):
         return ParcelBasicSerializer(establishment.parcels.all(), many=True).data
 
 
+class EstablishmentSeriesSerializer(serializers.Serializer):
+    scans = serializers.ListField()
+    sales = serializers.ListField()
+
+    class Meta:
+        fields = ["scans", "sales"]
+
+
 class EstablishmentChartSerializer(serializers.Serializer):
-    series = serializers.ListField()
+    series = EstablishmentSeriesSerializer()
     options = serializers.SerializerMethodField()
 
     class Meta:

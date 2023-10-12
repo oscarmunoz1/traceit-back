@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Avg, Q, ExpressionWrapper
 from django.db.models.functions import ExtractWeekDay, ExtractDay, ExtractMonth
+
 from .serializers import (
     RetrieveCompanySerializer,
     CreateCompanySerializer,
@@ -166,13 +167,28 @@ class EstablishmentViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
                 history__published=True,
                 **filter_kwargs,
             ).distinct()
-            histories = histories.annotate(day_of_week=ExtractWeekDay("date"))
-            histories = histories.values("day_of_week")
-            histories = histories.annotate(count=Count("id"))
+            total_histories = histories.annotate(day_of_week=ExtractWeekDay("date"))
+            total_histories = total_histories.values("day_of_week").annotate(
+                count=Count("id", distinct=True)
+            )
+
+            histories_with_review = histories.exclude(reviews__isnull=True)
+            histories_with_review = histories_with_review.annotate(
+                day_of_week=ExtractWeekDay("date")
+            )
+            histories_with_review = histories_with_review.values(
+                "day_of_week"
+            ).annotate(count=Count("id", distinct=True))
 
             result_dict = {}
-            for history in histories:
-                result_dict[history["day_of_week"]] = history["count"]
+            for history in total_histories:
+                if history["day_of_week"] not in result_dict:
+                    result_dict[history["day_of_week"]] = {}
+                result_dict[history["day_of_week"]]["scans"] = history["count"]
+            for history in histories_with_review:
+                if history["day_of_week"] not in result_dict:
+                    result_dict[history["day_of_week"]] = {}
+                result_dict[history["day_of_week"]]["reviews"] = history["count"]
             today = datetime.now()
             one_week_ago = today - timedelta(days=6)
             date_range = [
@@ -181,14 +197,25 @@ class EstablishmentViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
             ]
 
             series_result = []
+            series_result_reviews = []
             days_range = []
             for date in date_range:
                 day = (date.weekday() + 2) % 7
                 days_range.append(day)
                 if day in result_dict:
-                    series_result.append(result_dict[day])
+                    series_result.append(
+                        result_dict[day]["scans"]
+                    ) if "scans" in result_dict[day] else series_result.append(0)
+                    series_result_reviews.append(
+                        result_dict[day]["reviews"]
+                    ) if "reviews" in result_dict[
+                        day
+                    ] else series_result_reviews.append(
+                        0
+                    )
                 else:
                     series_result.append(0)
+                    series_result_reviews.append(0)
 
         elif period == "month":
             histories = HistoryScan.objects.filter(
@@ -196,19 +223,37 @@ class EstablishmentViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
                 history__published=True,
                 **filter_kwargs,
             ).distinct()
-            histories = histories.annotate(
+            total_histories = histories.annotate(
                 day_of_month=ExtractDay("date"), month=ExtractMonth("date")
             )
-            histories = histories.values("day_of_month", "month")
-            histories = histories.annotate(count=Count("id"))
+            total_histories = total_histories.values("day_of_month", "month")
+            total_histories = total_histories.annotate(count=Count("id", distinct=True))
+
+            histories_with_review = histories.exclude(reviews__isnull=True)
+            histories_with_review = histories_with_review.annotate(
+                day_of_month=ExtractDay("date"), month=ExtractMonth("date")
+            )
+            histories_with_review = histories_with_review.values(
+                "day_of_month", "month"
+            ).annotate(count=Count("id", distinct=True))
 
             result_dict = {}
-            for history in histories:
+            for history in total_histories:
                 month = history["month"]
                 day_of_month = history["day_of_month"]
                 if month not in result_dict:
                     result_dict[month] = {}
-                result_dict[month][day_of_month] = history["count"]
+                if day_of_month not in result_dict[month]:
+                    result_dict[month][day_of_month] = {}
+                result_dict[month][day_of_month]["scans"] = history["count"]
+            for history in histories_with_review:
+                month = history["month"]
+                day_of_month = history["day_of_month"]
+                if month not in result_dict:
+                    result_dict[month] = {}
+                if day_of_month not in result_dict[month]:
+                    result_dict[month][day_of_month] = {}
+                result_dict[month][day_of_month]["reviews"] = history["count"]
             today = datetime.now()
             one_month_ago = today - timedelta(days=31)
             date_range = [
@@ -217,40 +262,78 @@ class EstablishmentViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
             ]
 
             series_result = []
+            series_result_reviews = []
             days_range = []
             for date in date_range:
                 day = date.day
                 month = date.month
                 days_range.append(day)
                 if month in result_dict and day in result_dict[month]:
-                    series_result.append(result_dict[month][day])
+                    series_result.append(
+                        result_dict[month][day]["scans"]
+                    ) if "scans" in result_dict[month][day] else series_result.append(0)
+                    series_result_reviews.append(
+                        result_dict[month][day]["reviews"]
+                    ) if "reviews" in result_dict[month][
+                        day
+                    ] else series_result_reviews.append(
+                        0
+                    )
                 else:
                     series_result.append(0)
+                    series_result_reviews.append(0)
         elif period == "year":
             histories = HistoryScan.objects.filter(
                 history__parcel__establishment=establishment,
                 history__published=True,
                 **filter_kwargs,
             ).distinct()
-            histories = histories.annotate(month=ExtractMonth("date"))
-            histories = histories.values("month")
-            histories = histories.annotate(count=Count("id"))
+            total_histories = histories.annotate(month=ExtractMonth("date"))
+            total_histories = total_histories.values("month")
+            total_histories = total_histories.annotate(count=Count("id", distinct=True))
+
+            histories_with_review = histories.exclude(reviews__isnull=True)
+            histories_with_review = histories_with_review.annotate(
+                month=ExtractMonth("date")
+            )
+            histories_with_review = histories_with_review.values("month")
+            histories_with_review = histories_with_review.annotate(
+                count=Count("id", distinct=True)
+            )
 
             result_dict = {}
-            for history in histories:
+            for history in total_histories:
                 month = history["month"]
-                result_dict[month] = history["count"]
+                if month not in result_dict:
+                    result_dict[month] = {}
+                result_dict[month]["scans"] = history["count"]
+            for history in histories_with_review:
+                month = history["month"]
+                if month not in result_dict:
+                    result_dict[month] = {}
+                result_dict[month]["reviews"] = history["count"]
 
             series_result = []
+            series_result_reviews = []
             for month in range(1, 13):
                 if month in result_dict:
-                    series_result.append(result_dict[month])
+                    series_result.append(
+                        result_dict[month]["scans"]
+                    ) if "scans" in result_dict[month] else series_result.append(0)
+                    series_result_reviews.append(
+                        result_dict[month]["reviews"]
+                    ) if "reviews" in result_dict[
+                        month
+                    ] else series_result_reviews.append(
+                        0
+                    )
                 else:
                     series_result.append(0)
+                    series_result_reviews.append(0)
 
         result = {
             "scans_vs_sales": EstablishmentChartSerializer(
-                {"series": series_result},
+                {"series": {"scans": series_result, "sales": series_result_reviews}},
                 context={
                     "month_length": len(series_result) if period == "month" else None,
                     "period": period,

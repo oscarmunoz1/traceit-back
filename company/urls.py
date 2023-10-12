@@ -58,4 +58,5 @@ urlpatterns = [
     re_path(r"^", include(establishment_router.urls)),
     re_path(r"^", include(parcel_router.urls)),
     re_path(r"^", include(history_router.urls)),
+    path("", include("history.urls")),
 ]

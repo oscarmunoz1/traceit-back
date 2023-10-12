@@ -39,7 +39,7 @@ class CompanyNestedViewSet(viewsets.GenericViewSet):
     model = None
 
     def initial(self, request, *args, **kwargs):
-        lookup_field = "company_pk" if kwargs.get("company_pk") is not None else "pk"
+        lookup_field = "company_pk"
         company_pk = kwargs.get(lookup_field)
         if company_pk is not None:
             self.company = get_object_or_404(Company, pk=company_pk)
