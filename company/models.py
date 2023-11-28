@@ -33,7 +33,9 @@ class Establishment(models.Model):
     zone = models.CharField(max_length=30, blank=True, null=True)
     state = models.CharField(max_length=30)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to="establishment_images", blank=True)
+    album = models.ForeignKey(
+        "common.Gallery", on_delete=models.CASCADE, blank=True, null=True
+    )
     description = models.TextField(blank=True, null=True)
     country = models.CharField(max_length=30, blank=True, null=True)
 

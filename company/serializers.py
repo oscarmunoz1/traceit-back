@@ -6,6 +6,7 @@ from product.serializers import ParcelBasicSerializer
 
 class EstablishmentSerializer(ModelSerializer):
     parcels = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Establishment
@@ -25,6 +26,18 @@ class EstablishmentSerializer(ModelSerializer):
 
     def get_parcels(self, establishment):
         return ParcelBasicSerializer(establishment.parcels.all(), many=True).data
+
+    def get_image(self, establishment):
+        try:
+            return (
+                establishment.album.images.first().image.url
+                if establishment.album
+                and establishment.album.images.exists()
+                and establishment.album.images.first().image is not None
+                else None
+            )
+        except:
+            return None
 
 
 class UpdateEstablishmentSerializer(ModelSerializer):

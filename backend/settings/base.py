@@ -278,6 +278,10 @@ JWT_EXPIRATION_DELTA = timedelta(seconds=20)
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
+FILE_UPLOAD_MAX_MEMORY_SIZE = (
+    1024 * 1024 * 10
+)  # Set to desired size in bytes (10MB in this case)
+
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),

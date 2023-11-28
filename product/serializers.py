@@ -7,11 +7,11 @@ from common.models import Gallery
 
 class ParcelBasicSerializer(ModelSerializer):
     product = serializers.SerializerMethodField()
-    # image = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Parcel
-        fields = ("id", "name", "description", "product")
+        fields = ("id", "name", "description", "product", "image")
 
     def get_product(self, parcel):
         return (
@@ -20,10 +20,23 @@ class ParcelBasicSerializer(ModelSerializer):
             else "No current production"
         )
 
+    def get_image(self, parcel):
+        try:
+            return (
+                parcel.album.images.first().image.url
+                if parcel.album
+                and parcel.album.images.exists()
+                and parcel.album.images.first().image is not None
+                else None
+            )
+        except:
+            return None
+
 
 class RetrieveParcelSerializer(ModelSerializer):
     product = serializers.SerializerMethodField()
     establishment = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Parcel
@@ -34,6 +47,18 @@ class RetrieveParcelSerializer(ModelSerializer):
 
     def get_establishment(self, parcel):
         return parcel.establishment.name if parcel.establishment else None
+
+    def get_image(self, parcel):
+        try:
+            return (
+                parcel.album.images.first().image.url
+                if parcel.album
+                and parcel.album.images.exists()
+                and parcel.album.images.first().image is not None
+                else None
+            )
+        except:
+            return None
 
 
 class CreateParcelSerializer(ModelSerializer):
@@ -57,19 +82,25 @@ class CreateParcelSerializer(ModelSerializer):
         #     parcel.album.images.create(**image_data)
         return parcel
 
-    def update(self, instance, validated_data):
+        # def update(self, instance, validated_data):
         print("entro si si si no no")
+        print(self.context.get("request").FILES)
         print(self.context.get("request").__dict__)
         images_data = self.context.get("request").data.get("album")
         images_post = self.context.get("request").POST.get("album")
         image = self.context.get("request").FILES.get("album")
         data = self.context.get("request").data
+        data2 = self.context.get("request").POST
+        data3 = self.context.get("request").FILES
+
         print("images_data::::")
         print(images_data)
         print(validated_data)
         print(images_post)
         print(image)
         print(data)
+        print(data2)
+        print(data3)
 
         parcel = super().update(instance, validated_data)
         if parcel.album is None:

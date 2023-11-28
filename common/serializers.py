@@ -24,7 +24,7 @@ class GallerySerializer(serializers.ModelSerializer):
                 GalleryImage.objects.create(gallery=gallery, image=image_data)
         return gallery
 
-    def update(self, instance, validated_data):
+        # def update(self, instance, validated_data):
         images_data = self.context.get("request").data.get("images")
         instance.name = validated_data.get("name", instance.name)
         instance.save()

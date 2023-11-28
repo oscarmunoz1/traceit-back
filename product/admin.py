@@ -1,6 +1,8 @@
 from django.contrib import admin
 
+# from common.admin import GalleryImageInline
 from .models import Product, Parcel
+from common.models import GalleryImage
 
 
 class ProductAdmin(admin.ModelAdmin):
