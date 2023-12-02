@@ -93,3 +93,10 @@ media
 *.pem
 
 /static
+
+.venv
+/releases/*
+pip-wheel-metadata
+/poetry.toml
+
+poetry/core/*
