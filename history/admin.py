@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import History, ChemicalEvent, WeatherEvent, GeneralEvent, HistoryScan
+from .models import (
+    History,
+    ChemicalEvent,
+    WeatherEvent,
+    GeneralEvent,
+    HistoryScan,
+    ProductionEvent,
+)
 
 
 class ChemicalEventInline(admin.TabularInline):
@@ -21,6 +28,12 @@ class GeneralEventInline(admin.TabularInline):
     ordering = ("index",)
 
 
+class ProductionEventInline(admin.TabularInline):
+    model = ProductionEvent
+    extra = 1
+    ordering = ("index",)
+
+
 class EventAdmin(admin.ModelAdmin):
     list_display = ("date",)
     list_filter = ("date", "description")
@@ -37,7 +50,12 @@ class HistoryAdmin(admin.ModelAdmin):
         "name",
         "start_date",
     )
-    inlines = [ChemicalEventInline, WeatherEventInline, GeneralEventInline]
+    inlines = [
+        ChemicalEventInline,
+        WeatherEventInline,
+        GeneralEventInline,
+        ProductionEventInline,
+    ]
 
 
 class HistoryScanAdmin(admin.ModelAdmin):
@@ -46,5 +64,8 @@ class HistoryScanAdmin(admin.ModelAdmin):
 
 
 admin.site.register(WeatherEvent, EventAdmin)
+admin.site.register(ChemicalEvent, EventAdmin)
+admin.site.register(GeneralEvent, EventAdmin)
+admin.site.register(ProductionEvent, EventAdmin)
 admin.site.register(History, HistoryAdmin)
 admin.site.register(HistoryScan, HistoryScanAdmin)

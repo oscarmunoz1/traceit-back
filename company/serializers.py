@@ -50,7 +50,6 @@ class UpdateEstablishmentSerializer(ModelSerializer):
             "zone",
             "state",
             "company",
-            "image",
             "description",
             "country",
         )

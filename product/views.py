@@ -18,10 +18,10 @@ class ParcelViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
     queryset = Parcel.objects.all()
     filter_backends = [filters.OrderingFilter]
     # parser_classes = (MultiPartParser, FormParser)
-    parser_classes = (
-        MultiPartParser,
-        FileUploadParser,
-    )
+    # parser_classes = (
+    #     MultiPartParser,
+    #     FileUploadParser,
+    # )
 
     def get_serializer_class(self):
         if (
