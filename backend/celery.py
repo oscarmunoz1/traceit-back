@@ -1,16 +1,23 @@
-from __future__ import absolute_import, unicode_literals
+# from __future__ import absolute_import, unicode_literals
 
-import os
-from celery import Celery
+# import os
+# from celery import Celery
 
-# set the default Django settings module for the 'celery' program.
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
+# # set the default Django settings module for the 'celery' program.
+# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 
-# create a Celery instance and configure it using the settings from Django
-celery_app = Celery("backend")
+# # create a Celery instance and configure it using the settings from Django
+# celery_app = Celery(
+#     "backend",
+#     broker="redis://localhost:6379/0",
+#     backend="redis://localhost:6379/0",
+#     include=[
+#         "company.tasks",
+#     ],
+# )
 
-# Load task modules from all registered Django app configs.
-celery_app.config_from_object("django.conf:settings", namespace="CELERY")
+# # Load task modules from all registered Django app configs.
+# celery_app.config_from_object("django.conf:settings", namespace="CELERY")
 
-# Auto-discover tasks in all installed apps
-celery_app.autodiscover_tasks()
+# # Auto-discover tasks in all installed apps
+# celery_app.autodiscover_tasks()
