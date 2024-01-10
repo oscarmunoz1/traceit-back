@@ -25,8 +25,8 @@ CSRF_COOKIE_DOMAIN = "traceit.io"
 CSRF_COOKIE_SECURE = True
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-SERVER_EMAIL = os.environ["FROM_EMAIL_ADDRESS"]
-DEFAULT_FROM_EMAIL = os.environ["FROM_EMAIL_ADDRESS"]
+SERVER_EMAIL = os.environ.get("FROM_EMAIL_ADDRESS", "info@traceit.io")
+DEFAULT_FROM_EMAIL = os.environ.get("FROM_EMAIL_ADDRESS", "info@traceit.io")
 
 EMAIL_HOST = os.environ["EMAIL_HOST"]
 EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
