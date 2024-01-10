@@ -129,6 +129,7 @@ class EstablishmentProductsReputationSerializer(serializers.Serializer):
 
 class RetrieveCompanySerializer(ModelSerializer):
     establishments = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Company
@@ -137,6 +138,7 @@ class RetrieveCompanySerializer(ModelSerializer):
             "name",
             "tradename",
             "address",
+            "image",
             "city",
             "state",
             "country",
@@ -147,6 +149,18 @@ class RetrieveCompanySerializer(ModelSerializer):
 
     def get_establishments(self, company):
         return EstablishmentSerializer(company.establishment_set.all(), many=True).data
+
+    def get_image(self, company):
+        try:
+            return (
+                company.album.images.first().image.url
+                if company.album
+                and company.album.images.exists()
+                and company.album.images.first().image is not None
+                else None
+            )
+        except:
+            return None
 
 
 class CreateCompanySerializer(ModelSerializer):

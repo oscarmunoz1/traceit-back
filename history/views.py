@@ -40,7 +40,7 @@ from product.models import Parcel, Product
 from backend.permissions import CompanyNestedViewSet
 
 
-class HistoryViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
+class HistoryViewSet(viewsets.ModelViewSet):
     serializer_class = HistorySerializer
     filter_backends = [filters.OrderingFilter]
 
@@ -183,7 +183,12 @@ class EventViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
     filter_backends = [filters.OrderingFilter]
 
     def get_serializer_class(self):
-        event_type = self.request.data.get("event_type", None)
+        event_type = self.request.data.get(
+            "event_type", None
+        ) or self.request.query_params.get("event_type", None)
+        if event_type is None:
+            raise Exception("Event type is required")
+        event_type = int(event_type)
         if event_type == WEATHER_EVENT_TYPE:
             if (
                 self.action == "create"
@@ -218,7 +223,7 @@ class EventViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
             return GeneralEventSerializer
 
     def get_queryset(self):
-        event_type = self.request.query_params.get("event_type", None)
+        event_type = int(self.request.query_params.get("event_type", None))
         if event_type == WEATHER_EVENT_TYPE:
             return WeatherEvent.objects.all()
         elif event_type == PRODUCTION_EVENT_TYPE:

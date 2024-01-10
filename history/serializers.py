@@ -9,6 +9,12 @@ from .models import (
     HistoryScan,
     ProductionEvent,
 )
+from .constants import (
+    WEATHER_EVENT_TYPE,
+    PRODUCTION_EVENT_TYPE,
+    CHEMICAL_EVENT_TYPE,
+    GENERAL_EVENT_TYPE,
+)
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -25,6 +31,7 @@ class UpdateChemicalEventSerializer(serializers.ModelSerializer):
 
 class ChemicalEventSerializer(EventSerializer):
     type = serializers.SerializerMethodField()
+    event_type = serializers.SerializerMethodField()
 
     class Meta:
         model = ChemicalEvent
@@ -32,6 +39,9 @@ class ChemicalEventSerializer(EventSerializer):
 
     def get_type(self, chemical_event):
         return "Appl. of " + chemical_event.get_type_display()
+
+    def get_event_type(self, chemical_event):
+        return CHEMICAL_EVENT_TYPE
 
 
 class UpdateWeatherEventSerializer(serializers.ModelSerializer):
@@ -89,6 +99,7 @@ class UpdateWeatherEventSerializer(serializers.ModelSerializer):
 
 class WeatherEventSerializer(EventSerializer):
     type = serializers.SerializerMethodField()
+    event_type = serializers.SerializerMethodField()
 
     class Meta:
         model = WeatherEvent
@@ -96,6 +107,9 @@ class WeatherEventSerializer(EventSerializer):
 
     def get_type(self, weather_event):
         return weather_event.get_type_display()
+
+    def get_event_type(self, weather_event):
+        return WEATHER_EVENT_TYPE
 
 
 class UpdateProductionEventSerializer(serializers.ModelSerializer):
@@ -106,6 +120,7 @@ class UpdateProductionEventSerializer(serializers.ModelSerializer):
 
 class ProductionEventSerializer(EventSerializer):
     type = serializers.SerializerMethodField()
+    event_type = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductionEvent
@@ -113,6 +128,9 @@ class ProductionEventSerializer(EventSerializer):
 
     def get_type(self, production_event):
         return production_event.get_type_display()
+
+    def get_event_type(self, production_event):
+        return PRODUCTION_EVENT_TYPE
 
 
 class UpdateGeneralEventSerializer(serializers.ModelSerializer):
@@ -123,6 +141,7 @@ class UpdateGeneralEventSerializer(serializers.ModelSerializer):
 
 class GeneralEventSerializer(EventSerializer):
     type = serializers.SerializerMethodField()
+    event_type = serializers.SerializerMethodField()
 
     class Meta:
         model = GeneralEvent
@@ -130,6 +149,9 @@ class GeneralEventSerializer(EventSerializer):
 
     def get_type(self, general_event):
         return general_event.name
+
+    def get_event_type(self, general_event):
+        return GENERAL_EVENT_TYPE
 
 
 class HistorySerializer(serializers.ModelSerializer):

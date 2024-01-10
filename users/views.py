@@ -9,7 +9,13 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.permissions import AllowAny
 from rest_framework import status, generics
-from rest_framework.decorators import action, permission_classes, api_view
+from rest_framework.decorators import (
+    action,
+    permission_classes as permission_classes_decorator,
+    api_view,
+)
+from django.shortcuts import get_object_or_404
+
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from .serializers import LoginSerializer, RegisterSerializer, MeSerializer
@@ -21,9 +27,7 @@ from django.conf import settings
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    http_method_names = ["get"]
     serializer_class = BasicUserSerializer
-    permission_classes = (IsAuthenticated,)
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["date_joined"]
     ordering = ["-date_joined"]
@@ -39,35 +43,42 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return obj
 
+    def get_permissions(self):
+        if self.action == "verify_email":
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
     @action(detail=False, methods=["get"])
     def me(self, request, pk=None):
         serializer = MeSerializer(request.user, context={"request": request})
         return Response(serializer.data)
 
-
-@permission_classes([AllowAny])
-def verify_email(self, request, *args, **kwargs):
-    user = self.get_object_or_404(User, pk=request.data.get("email"))
-    code = request.data.get("code")
-    if not code:
-        return Response(
-            {"error": "Verification code is required"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-    if user.is_verified:
-        return Response(
-            {"error": "User is already verified"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-    if user.verification_code.code != code:
-        return Response(
-            {"error": "Verification code is invalid"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-    user.verification_code.delete()
-    user.is_verified = True
-    user.save()
-    return Response(status=status.HTTP_200_OK)
+    @action(detail=False, methods=["post"])
+    def verify_email(self, request, pk=None):
+        user = get_object_or_404(User, email=request.data.get("email"))
+        code = request.data.get("code")
+        if not code:
+            return Response(
+                {"error": "Verification code is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if user.is_verified:
+            return Response(
+                {"error": "User is already verified"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if user.verification_code.last().code != code:
+            return Response(
+                {"error": "Verification code is invalid"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user.verification_code.all().delete()
+        user.is_verified = True
+        user.is_active = True
+        user.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 class LoginViewSet(viewsets.ModelViewSet, TokenObtainPairView):

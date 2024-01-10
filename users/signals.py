@@ -1,6 +1,13 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import VerificationCode, User
+from django.conf import settings
+from smtplib import SMTPException
+import logging
+from .utils import send_invitation_to_user
+
+logger = logging.getLogger(__name__)
+
 import random
 import string
 
@@ -15,3 +22,15 @@ def create_verification_code(sender, instance, created, **kwargs):
     if created:
         code = generate_verification_code()  # generate a random code
         VerificationCode.objects.create(user=instance, code=code)
+
+        verification_link = f"{settings.BASE_APP_URL}auth/verifyemail?email={instance.email}&code={code}"
+
+        # send verification code to user
+        try:
+            send_invitation_to_user(
+                instance.email, verification_link, instance.first_name, instance.email
+            )
+        except SMTPException as e:
+            logger.error(
+                f"Could not send invitation email to user: {instance.email}, Error: {e}"
+            )

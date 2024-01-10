@@ -4,6 +4,7 @@ from rest_framework_simplejwt.settings import api_settings
 from django.contrib.auth.models import update_last_login
 from django.core.exceptions import ObjectDoesNotExist
 from .models import User, WorksIn
+from .constants import PRODUCER
 
 
 class WorksInSerializer(serializers.ModelSerializer):
@@ -106,5 +107,5 @@ class RegisterSerializer(BasicUserSerializer):
         try:
             user = User.objects.get(email=validated_data["email"])
         except ObjectDoesNotExist:
-            user = User.objects.create_user(**validated_data)
+            user = User.objects.create_user(**validated_data, user_type=PRODUCER)
         return user
