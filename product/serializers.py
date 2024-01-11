@@ -37,6 +37,7 @@ class RetrieveParcelSerializer(ModelSerializer):
     product = serializers.SerializerMethodField()
     establishment = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
 
     class Meta:
         model = Parcel
@@ -59,6 +60,16 @@ class RetrieveParcelSerializer(ModelSerializer):
             )
         except:
             return None
+
+    def get_images(self, parcel):
+        try:
+            return [
+                image.image.url
+                for image in parcel.album.images.all()
+                if image.image is not None
+            ]
+        except:
+            return []
 
 
 class CreateParcelSerializer(ModelSerializer):
