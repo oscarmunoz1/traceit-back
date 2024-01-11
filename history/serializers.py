@@ -184,6 +184,7 @@ class HistorySerializer(serializers.ModelSerializer):
             "certificate_percentage",
             "product",
             "qr_code",
+            "reputation",
         ]
         read_only_fields = ["id", "created_at", "updated_at", "certificate_percentage"]
 
