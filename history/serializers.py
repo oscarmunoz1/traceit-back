@@ -242,6 +242,7 @@ class PublicHistorySerializer(serializers.ModelSerializer):
     company = serializers.SerializerMethodField()
     location = serializers.SerializerMethodField()
     establishment = serializers.SerializerMethodField()
+    establishment_description = serializers.SerializerMethodField()
     parcel = serializers.SerializerMethodField()
     history_scan = serializers.SerializerMethodField()
 
@@ -260,6 +261,7 @@ class PublicHistorySerializer(serializers.ModelSerializer):
             "company",
             "location",
             "establishment",
+            "establishment_description",
             "parcel",
             "history_scan",
         ]
@@ -268,9 +270,7 @@ class PublicHistorySerializer(serializers.ModelSerializer):
         return history.product.name if history.product else None
 
     def get_events(self, history):
-        return WeatherEventSerializer(
-            history.history_weatherevent_events.all(), many=True
-        ).data
+        return history.get_events()
 
     def get_certificate_percentage(self, history):
         return history.certificate_percentage
@@ -283,6 +283,9 @@ class PublicHistorySerializer(serializers.ModelSerializer):
 
     def get_establishment(self, history):
         return history.parcel.establishment.name if history.parcel else None
+
+    def get_establishment_description(self, history):
+        return history.parcel.establishment.description if history.parcel else None
 
     def get_parcel(self, history):
         return history.parcel.name if history.parcel else None
