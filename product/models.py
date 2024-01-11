@@ -35,6 +35,8 @@ class Parcel(models.Model):
         null=True,
         related_name="current_parcel",
     )
+    polygon = models.JSONField(blank=True, null=True)
+    map_metadata = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return str(self.id) + " - " + self.name + " - " + self.establishment.name
