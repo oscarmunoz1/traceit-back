@@ -1,6 +1,7 @@
 import os
 
 from backend.settings.base import *
+from decouple import config
 
 
 ALLOWED_HOSTS = ["api-us-east-1.traceit.io"]
@@ -28,7 +29,7 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 SERVER_EMAIL = os.environ.get("FROM_EMAIL_ADDRESS", "info@traceit.io")
 DEFAULT_FROM_EMAIL = os.environ.get("FROM_EMAIL_ADDRESS", "info@traceit.io")
 
-EMAIL_HOST = os.environ["EMAIL_HOST"]
+EMAIL_HOST = config("EMAIL_HOST")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)
 EMAIL_USE_TLS = False if os.environ.get("EMAIL_DISABLE_TLS") == "True" else True
