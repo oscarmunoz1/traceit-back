@@ -84,6 +84,8 @@ class HistoryViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
 
         history = get_object_or_404(queryset, pk=pk)
+        print("Info de la request:\n\n\n\n")
+        print(request.META)
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for:
             ip_address = x_forwarded_for.split(",")[0]
