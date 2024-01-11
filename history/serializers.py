@@ -159,6 +159,7 @@ class HistorySerializer(serializers.ModelSerializer):
     certificate_percentage = serializers.SerializerMethodField()
     members = serializers.SerializerMethodField()
     product = serializers.SerializerMethodField()
+    parcel = serializers.SerializerMethodField()
 
     class Meta:
         model = History
@@ -170,6 +171,7 @@ class HistorySerializer(serializers.ModelSerializer):
             "published",
             "events",
             "earning",
+            "parcel",
             "members",
             "certificate_percentage",
             "product",
@@ -182,6 +184,9 @@ class HistorySerializer(serializers.ModelSerializer):
 
     def get_events(self, history):
         return history.get_events()
+
+    def get_parcel(self, history):
+        return history.parcel.name if history.parcel else None
 
     def get_certificate_percentage(self, history):
         return history.certificate_percentage

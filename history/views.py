@@ -114,10 +114,7 @@ class HistoryViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class HistoryScanViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
-    queryset = HistoryScan.objects.all()
-    serializer_class = ListHistoryClassSerializer
-
+class PublicHistoryScanViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     @permission_classes([AllowAny])
     def comment(self, request, pk=None):
@@ -130,6 +127,11 @@ class HistoryScanViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
         history_scan.comment = comment
         history_scan.save()
         return Response(status=status.HTTP_200_OK)
+
+
+class HistoryScanViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
+    queryset = HistoryScan.objects.all()
+    serializer_class = ListHistoryClassSerializer
 
     @action(detail=False, methods=["get"])
     def list_scans_by_establishment(
