@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from .models import Parcel, Product
 from rest_framework import serializers
-from common.serializers import GallerySerializer
+from common.serializers import GallerySerializer, GalleryImageSerializer
 from common.models import Gallery
 
 
@@ -74,7 +74,7 @@ class RetrieveParcelSerializer(ModelSerializer):
 
 class CreateParcelSerializer(ModelSerializer):
     product = serializers.SerializerMethodField()
-    album = GallerySerializer(required=False, read_only=True)
+    album = GallerySerializer(required=False)
 
     class Meta:
         model = Parcel
@@ -83,44 +83,27 @@ class CreateParcelSerializer(ModelSerializer):
     def get_product(self, parcel):
         return "No current production"
 
-    # def create(self, validated_data):
-    #     images_data = self.context.get("request").data.get("images")
-    #     parcel = Parcel.objects.create(**validated_data)
-    #     if parcel.album is None:
-    #         parcel.album = Gallery.objects.create()
-    #     # for image_data in images_data:
-    #     #     parcel.album.images.create(**image_data)
-    #     return parcel
+    def update(self, instance, validated_data):
+        album_data = self.context.get("request").FILES
+        if album_data:
+            gallery = instance.album
+            if gallery is None:
+                gallery = Gallery.objects.create()
+            for image_data in album_data.values():
+                gallery_image = gallery.images.create(image=image_data)
+                gallery_image.save()
+            validated_data["album"] = gallery
+        return super().update(instance, validated_data)
 
-    #     # def update(self, instance, validated_data):
-    #     print("entro si si si no no")
-    #     print(self.context.get("request").FILES)
-    #     print(self.context.get("request").__dict__)
-    #     images_data = self.context.get("request").data.get("album")
-    #     images_post = self.context.get("request").POST.get("album")
-    #     image = self.context.get("request").FILES.get("album")
-    #     data = self.context.get("request").data
-    #     data2 = self.context.get("request").POST
-    #     data3 = self.context.get("request").FILES
-
-    #     print("images_data::::")
-    #     print(images_data)
-    #     print(validated_data)
-    #     print(images_post)
-    #     print(image)
-    #     print(data)
-    #     print(data2)
-    #     print(data3)
-
-    #     parcel = super().update(instance, validated_data)
-    #     if parcel.album is None:
-    #         print("album none entro si si si no no no")
-    #         parcel.album = Gallery.objects.create()
-    #     # for image_data in images_data:
-    #     #     print("entro si si si no no no no")
-    #     #     print(image_data)
-    #     #     parcel.album.images.create(**image_data)
-    #     return parcel
+    def create(self, validated_data):
+        album_data = self.context.get("request").FILES
+        if album_data:
+            gallery = Gallery.objects.create()
+            for image_data in album_data.values():
+                gallery_image = gallery.images.create(image=image_data)
+                gallery_image.save()
+            validated_data["album"] = gallery
+        return super().create(validated_data)
 
 
 class ProductListOptionsSerializer(serializers.ModelSerializer):

@@ -12,11 +12,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from backend.permissions import CompanyNestedViewSet
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
+from common.models import GalleryImage, Gallery
 
 
 class ParcelViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
     queryset = Parcel.objects.all()
     filter_backends = [filters.OrderingFilter]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_serializer_class(self):
         if (
@@ -26,6 +28,11 @@ class ParcelViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
         ):
             return CreateParcelSerializer
         return RetrieveParcelSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
 
     @action(detail=True, methods=["get"])
     def current_history(
@@ -66,115 +73,108 @@ class ParcelViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
             return Response(HistorySerializer(history).data)
         return Response(status=400)
 
-    @action(detail=True, methods=["post"])
-    def update_parcel(
-        self, request, pk=None, parcel_pk=None, company_pk=None, establishment_pk=None
-    ):
-        import pdb
+    # @action(detail=True, methods=["post"])
+    # def update_parcel(
+    #     self, request, pk=None, parcel_pk=None, company_pk=None, establishment_pk=None
+    # ):
+    #     import pdb
 
-        pdb.set_trace()
+    #     pdb.set_trace()
 
-        parcel = self.get_object()
-        parsed_body = request.body
-        print(parsed_body)
-        images_data = request.data.get("album")
-        images_post = request.POST.get("album")
-        image = request.FILES.get("album")
-        data = request.data
-        data2 = request.POST
-        data3 = request.data.get("album")
-        # print(parsed_body)
+    #     parcel = self.get_object()
+    #     parsed_body = request.body
+    #     print(request.FILES.getList("album"))
+    #     name = request.data.get("id")
+    #     images_data = request.data.get("album")
+    #     images_post = request.POST.get("album")
+    #     image = request.FILES.get("album")
+    #     data = request.data
+    #     data2 = request.POST
+    #     data3 = request.data.get("album")
+    #     # print(parsed_body)
 
-        print("despues")
+    #     print("despues")
 
-        print("images_data::::")
-        print(images_data)
-        print(images_post)
-        print(image)
-        print(data)
-        print(data2)
-        print(data3)
-        print(request)
-        # parcel_data = request.data
-        # serializer = CreateParcelSerializer(
-        #     parcel, data=parcel_data, partial=True, context={"request": request}
-        # )
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     return Response(serializer.data)
-        return Response({}, status=400)
+    #     print("images_data::::->>>>>>>")
+    #     print(name)
+    #     print(images_data)
+    #     print(images_post)
+    #     print(image)
+    #     print(data)
+    #     print(data2)
+    #     print(data3)
+    #     print(request)
+    #     # parcel_data = request.data
+    #     # serializer = CreateParcelSerializer(
+    #     #     parcel, data=parcel_data, partial=True, context={"request": request}
+    #     # )
+    #     # if serializer.is_valid():
+    #     #     serializer.save()
+    #     #     return Response(serializer.data)
+    #     return Response({}, status=400)
 
-    def partial_update(self, request, pk=None, company_pk=None, establishment_pk=None):
-        # images_data = request.data.get("album")
-        # images_post = request.POST.get("album")
-        # image = request.FILES.get("album")
-        # data = request.data
-        # data2 = request.POST
-        # data3 = request.data.get("album")
-        print("anntes")
-        print(request.body)
-        print("despues")
-        # print("anntes")
-        # print(request.FILES)
+    # def partial_update(self, request, pk=None, company_pk=None, establishment_pk=None):
+    #     parcel = self.get_object()
+    #     parcel_data = request.data
+    #     print(request.FILES)
+    #     if parcel_data.get("album") is not None:
+    #         album_data = parcel_data.get("album")
+    #         parcel_data.pop("album")
+    #     serializer = CreateParcelSerializer(
+    #         parcel, data=parcel_data, partial=True, context={"request": request}
+    #     )
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         if album_data is None and album_data is not None:
+    #             album = Gallery.objects.create()
+    #             parcel.album = album
+    #             parcel.save()
+    #         if album_data is not None:
+    #             print("entro1")
+    #             for image_data in request.FILES:
+    #                 print("entro2")
+    #                 print(image_data)
+    #                 print(request.FILES[image_data])
+    #                 GalleryImage.objects.create(
+    #                     image=request.FILES[image_data], gallery_id=1
+    #                 )
 
-        # print("despues")
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=400)
 
-        # print("images_data::::")
-        # print(images_data)
-        # print(images_post)
-        # print(image)
-        # print(data)
-        # print(data2)
-        # print(data3)
-        parcel = self.get_object()
-        parcel_data = request.data
-        serializer = CreateParcelSerializer(
-            parcel, data=parcel_data, partial=True, context={"request": request}
-        )
-        if serializer.is_valid():
-            serializer.save()
-            album = parcel_data.get("album")
-            if album is not None:
-                for image_data in album.get("images"):
-                    parcel.album.images.create(
-                        image=image_data.get("image"), gallery=parcel.album
-                    )
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+    # def update(self, request, pk=None, company_pk=None, establishment_pk=None):
+    #     images_data = request.data.get("album")
+    #     images_post = request.POST.get("album")
+    #     image = request.FILES.get("album")
+    #     data = request.data
+    #     data2 = request.POST
+    #     data3 = request.data.get("album")
+    #     print("anntes")
+    #     print(request.FILES)
+    #     print("despues")
 
-    def update(self, request, pk=None, company_pk=None, establishment_pk=None):
-        images_data = request.data.get("album")
-        images_post = request.POST.get("album")
-        image = request.FILES.get("album")
-        data = request.data
-        data2 = request.POST
-        data3 = request.data.get("album")
-        print("anntes")
-        print(request.FILES)
-        print("despues")
-
-        print("images_data::::")
-        print(images_data)
-        print(images_post)
-        print(image)
-        print(data)
-        print(data2)
-        print(data3)
-        parcel = self.get_object()
-        parcel_data = request.data
-        serializer = CreateParcelSerializer(
-            parcel, data=parcel_data, partial=True, context={"request": request}
-        )
-        if serializer.is_valid():
-            serializer.save()
-            album = parcel_data.get("album")
-            if album is not None:
-                for image_data in album.get("images"):
-                    parcel.album.images.create(
-                        image=image_data.get("image"), gallery=parcel.album
-                    )
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+    #     print("images_data::::")
+    #     print(images_data)
+    #     print(images_post)
+    #     print(image)
+    #     print(data)
+    #     print(data2)
+    #     print(data3)
+    #     parcel = self.get_object()
+    #     parcel_data = request.data
+    #     serializer = CreateParcelSerializer(
+    #         parcel, data=parcel_data, partial=True, context={"request": request}
+    #     )
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         album = parcel_data.get("album")
+    #         if album is not None:
+    #             for image_data in album.get("images"):
+    #                 parcel.album.images.create(
+    #                     image=image_data.get("image"), gallery=parcel.album
+    #                 )
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=400)
 
 
 class ProductsViewSet(CompanyNestedViewSet, mixins.ListModelMixin):
