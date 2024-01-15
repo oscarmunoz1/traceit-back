@@ -19,17 +19,9 @@ from common.models import Gallery
 
 
 class EventSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-
     class Meta:
         model = CommonEvent
         fields = "__all__"
-
-    def get_image(self, event):
-        try:
-            return event.image.url if event.image is not None else "je"
-        except:
-            return None
 
 
 class UpdateChemicalEventSerializer(serializers.ModelSerializer):
