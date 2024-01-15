@@ -145,7 +145,9 @@ class History(models.Model):
 class CommonEvent(models.Model):
     description = models.TextField()
     date = models.DateTimeField()
-    image = models.ImageField(upload_to="event_images", blank=True)
+    album = models.ForeignKey(
+        "common.Gallery", on_delete=models.CASCADE, blank=True, null=True
+    )
     certified = models.BooleanField(default=False)
     history = models.ForeignKey(
         History,
@@ -161,16 +163,6 @@ class CommonEvent(models.Model):
 
     class Meta:
         abstract = True
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.index = (
-                self.history.history_weatherevent_events.count()
-                + self.history.history_chemicalevent_events.count()
-                + self.history.history_generalevent_events.count()
-                + self.history.history_productionevent_events.count()
-            ) + 1
-        super(CommonEvent, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
         if self.history.parcel is not None:

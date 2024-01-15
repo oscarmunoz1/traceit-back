@@ -89,7 +89,7 @@ class CreateParcelSerializer(ModelSerializer):
             gallery = instance.album
             if gallery is None:
                 gallery = Gallery.objects.create()
-            for image_data in album_data.values():
+            for image_data in album_data.getlist("album[images]"):
                 gallery_image = gallery.images.create(image=image_data)
                 gallery_image.save()
             validated_data["album"] = gallery
@@ -99,7 +99,7 @@ class CreateParcelSerializer(ModelSerializer):
         album_data = self.context.get("request").FILES
         if album_data:
             gallery = Gallery.objects.create()
-            for image_data in album_data.values():
+            for image_data in album_data.getlist("album[images]"):
                 gallery_image = gallery.images.create(image=image_data)
                 gallery_image.save()
             validated_data["album"] = gallery

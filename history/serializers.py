@@ -15,6 +15,7 @@ from .constants import (
     CHEMICAL_EVENT_TYPE,
     GENERAL_EVENT_TYPE,
 )
+from common.models import Gallery
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -103,6 +104,28 @@ class UpdateWeatherEventSerializer(serializers.ModelSerializer):
             data["end_date"] = instance.extra_data["end_date"]
         data.pop("extra_data")
         return data
+
+    def update(self, instance, validated_data):
+        album_data = self.context.get("request").FILES
+        if album_data:
+            gallery = instance.album
+            if gallery is None:
+                gallery = Gallery.objects.create()
+            for image_data in album_data.getlist("album[images]"):
+                gallery_image = gallery.images.create(image=image_data)
+                gallery_image.save()
+            validated_data["album"] = gallery
+        return super().update(instance, validated_data)
+
+    def create(self, validated_data):
+        album_data = self.context.get("request").FILES
+        if album_data:
+            gallery = Gallery.objects.create()
+            for image_data in album_data.getlist("album[images]"):
+                gallery_image = gallery.images.create(image=image_data)
+                gallery_image.save()
+            validated_data["album"] = gallery
+        return super().create(validated_data)
 
 
 class WeatherEventSerializer(EventSerializer):

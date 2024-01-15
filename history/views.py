@@ -189,9 +189,11 @@ class EventViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
     filter_backends = [filters.OrderingFilter]
 
     def get_serializer_class(self):
-        event_type = self.request.data.get(
-            "event_type", None
-        ) or self.request.query_params.get("event_type", None)
+        event_type = (
+            self.request.data.get("event_type")
+            if "event_type" in self.request.data
+            else self.request.query_params.get("event_type", None)
+        )
         if event_type is None:
             raise Exception("Event type is required")
         event_type = int(event_type)
@@ -229,7 +231,11 @@ class EventViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
             return GeneralEventSerializer
 
     def get_queryset(self):
-        event_type = int(self.request.query_params.get("event_type", None))
+        event_type = (
+            self.request.data.get("event_type")
+            if "event_type" in self.request.data
+            else self.request.query_params.get("event_type", None)
+        )
         if event_type == WEATHER_EVENT_TYPE:
             return WeatherEvent.objects.all()
         elif event_type == PRODUCTION_EVENT_TYPE:
@@ -241,7 +247,7 @@ class EventViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         parcels = self.request.data.get("parcels", None)
-        event_type = self.request.data.get("event_type", None)
+        event_type = int(self.request.data.get("event_type", None))
         if parcels is None or parcels is []:
             raise Exception("Parcel is required")
         parcels = Parcel.objects.filter(id__in=parcels).select_related(
@@ -260,4 +266,13 @@ class EventViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
             else:
                 history = parcel.current_history
             event_model = event_map.get(event_type, GeneralEvent)
-            event_model.objects.create(history=history, **serializer.validated_data)
+            index = (
+                history.history_weatherevent_events.count()
+                + history.history_chemicalevent_events.count()
+                + history.history_generalevent_events.count()
+                + history.history_productionevent_events.count()
+            ) + 1
+            event_model.objects.create(
+                history=history, index=index, **serializer.validated_data
+            )
+        serializer.save()

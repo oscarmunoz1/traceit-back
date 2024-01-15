@@ -2,6 +2,8 @@ from rest_framework.serializers import ModelSerializer
 from .models import Company, Establishment
 from rest_framework import serializers
 from product.serializers import ParcelBasicSerializer
+from common.serializers import GallerySerializer
+from common.models import Gallery
 
 
 class EstablishmentSerializer(ModelSerializer):
@@ -41,6 +43,8 @@ class EstablishmentSerializer(ModelSerializer):
 
 
 class UpdateEstablishmentSerializer(ModelSerializer):
+    album = GallerySerializer(required=False)
+
     class Meta:
         model = Establishment
         fields = (
@@ -48,6 +52,7 @@ class UpdateEstablishmentSerializer(ModelSerializer):
             "name",
             "city",
             "zone",
+            "album",
             "state",
             "company",
             "description",
@@ -56,6 +61,28 @@ class UpdateEstablishmentSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         return EstablishmentSerializer(instance).data
+
+    def update(self, instance, validated_data):
+        album_data = self.context.get("request").FILES
+        if album_data:
+            gallery = instance.album
+            if gallery is None:
+                gallery = Gallery.objects.create()
+            for image_data in album_data.values():
+                gallery_image = gallery.images.create(image=image_data)
+                gallery_image.save()
+            validated_data["album"] = gallery
+        return super().update(instance, validated_data)
+
+    def create(self, validated_data):
+        album_data = self.context.get("request").FILES
+        if album_data:
+            gallery = Gallery.objects.create()
+            for image_data in album_data.getlist("album[images]"):
+                gallery_image = gallery.images.create(image=image_data)
+                gallery_image.save()
+            validated_data["album"] = gallery
+        return super().create(validated_data)
 
 
 class RetrieveEstablishmentSerializer(ModelSerializer):
