@@ -243,8 +243,9 @@ class EventViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         parcels = self.request.POST.getlist("parcels", None)
-        event_type = int(self.request.data.get("event_type", None))
-
+        event_type = self.request.data.get("event_type", None)
+        if event_type is None:
+            raise Exception("Event type is required")
         if parcels is None or parcels is []:
             raise Exception("Parcel is required")
         parcels = Parcel.objects.filter(
@@ -263,7 +264,6 @@ class EventViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
                 parcel.save()
             else:
                 history = parcel.current_history
-            event_model = event_map.get(event_type, GeneralEvent)
             index = (
                 history.history_weatherevent_events.count()
                 + history.history_chemicalevent_events.count()
@@ -271,4 +271,10 @@ class EventViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
                 + history.history_productionevent_events.count()
             ) + 1
 
-            serializer.save(history=history, index=index, **serializer.validated_data)
+            event_model = event_map.get(int(event_type), GeneralEvent)
+            event = event_model.objects.create(
+                history=history,
+                index=index,
+                **serializer.validated_data,
+            )
+            event.save()
