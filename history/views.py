@@ -253,28 +253,19 @@ class EventViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
         ).select_related("current_history")
 
         for parcel in parcels:
-            if parcel.current_history is None:
-                history = History.objects.create(
-                    name="Default History",
-                    start_date=datetime.now(),
-                    published=False,
-                    parcel=parcel,
-                )
-                parcel.current_history = history
-                parcel.save()
-            else:
+            if parcel.current_history is not None:
                 history = parcel.current_history
-            index = (
-                history.history_weatherevent_events.count()
-                + history.history_chemicalevent_events.count()
-                + history.history_generalevent_events.count()
-                + history.history_productionevent_events.count()
-            ) + 1
+                index = (
+                    history.history_weatherevent_events.count()
+                    + history.history_chemicalevent_events.count()
+                    + history.history_generalevent_events.count()
+                    + history.history_productionevent_events.count()
+                ) + 1
 
-            event_model = event_map.get(int(event_type), GeneralEvent)
-            event = event_model.objects.create(
-                history=history,
-                index=index,
-                **serializer.validated_data,
-            )
-            event.save()
+                event_model = event_map.get(int(event_type), GeneralEvent)
+                event = event_model.objects.create(
+                    history=history,
+                    index=index,
+                    **serializer.validated_data,
+                )
+                event.save()

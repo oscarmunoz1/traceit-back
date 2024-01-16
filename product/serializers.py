@@ -8,10 +8,18 @@ from common.models import Gallery
 class ParcelBasicSerializer(ModelSerializer):
     product = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+    has_current_production = serializers.SerializerMethodField()
 
     class Meta:
         model = Parcel
-        fields = ("id", "name", "description", "product", "image")
+        fields = (
+            "id",
+            "name",
+            "description",
+            "product",
+            "image",
+            "has_current_production",
+        )
 
     def get_product(self, parcel):
         return (
@@ -19,6 +27,9 @@ class ParcelBasicSerializer(ModelSerializer):
             if parcel.current_history and parcel.current_history.product
             else "No current production"
         )
+
+    def get_has_current_production(self, parcel):
+        return parcel.current_history is not None
 
     def get_image(self, parcel):
         try:
@@ -75,6 +86,7 @@ class RetrieveParcelSerializer(ModelSerializer):
 class CreateParcelSerializer(ModelSerializer):
     product = serializers.SerializerMethodField()
     album = GallerySerializer(required=False)
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Parcel
@@ -104,6 +116,18 @@ class CreateParcelSerializer(ModelSerializer):
                 gallery_image.save()
             validated_data["album"] = gallery
         return super().create(validated_data)
+
+    def get_image(self, parcel):
+        try:
+            return (
+                parcel.album.images.first().image.url
+                if parcel.album
+                and parcel.album.images.exists()
+                and parcel.album.images.first().image is not None
+                else None
+            )
+        except:
+            return None
 
 
 class ProductListOptionsSerializer(serializers.ModelSerializer):
