@@ -165,6 +165,8 @@ class CommonEvent(models.Model):
         abstract = True
 
     def __str__(self) -> str:
+        if self.history is None:
+            return "-"
         if self.history.parcel is not None:
             return (
                 self.history.parcel.name

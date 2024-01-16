@@ -16,6 +16,8 @@ from .constants import (
     GENERAL_EVENT_TYPE,
 )
 from common.models import Gallery
+from product.models import Product, Parcel
+from company.models import Establishment
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -271,15 +273,37 @@ class ListHistoryClassSerializer(serializers.ModelSerializer):
         return history_scan.history.parcel.name if history_scan.history.parcel else None
 
 
+class PublicProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ["name"]
+
+
+class PublicEstablishmentSerializer(serializers.ModelSerializer):
+    location = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Establishment
+        fields = ["name", "description", "location"]
+
+    def get_location(self, establishment):
+        return establishment.get_location()
+
+
+class PublicParcelSerializer(serializers.ModelSerializer):
+    establishment = PublicEstablishmentSerializer()
+
+    class Meta:
+        model = Parcel
+        fields = ["name", "polygon", "map_metadata", "establishment"]
+
+
 class PublicHistorySerializer(serializers.ModelSerializer):
     events = serializers.SerializerMethodField()
     certificate_percentage = serializers.SerializerMethodField()
-    product = serializers.SerializerMethodField()
     company = serializers.SerializerMethodField()
-    location = serializers.SerializerMethodField()
-    establishment = serializers.SerializerMethodField()
-    establishment_description = serializers.SerializerMethodField()
-    parcel = serializers.SerializerMethodField()
+    parcel = PublicParcelSerializer()
+    product = PublicProductSerializer()
     history_scan = serializers.SerializerMethodField()
 
     class Meta:
@@ -292,18 +316,11 @@ class PublicHistorySerializer(serializers.ModelSerializer):
             "events",
             "certificate_percentage",
             "product",
-            "description",
             "reputation",
             "company",
-            "location",
-            "establishment",
-            "establishment_description",
             "parcel",
             "history_scan",
         ]
-
-    def get_product(self, history):
-        return history.product.name if history.product else None
 
     def get_events(self, history):
         return history.get_events()
@@ -313,15 +330,6 @@ class PublicHistorySerializer(serializers.ModelSerializer):
 
     def get_company(self, history):
         return history.parcel.establishment.company.name if history.parcel else None
-
-    def get_location(self, history):
-        return f"{history.parcel.establishment.city if history.parcel.establishment.city is not None else '-'}, {history.parcel.establishment.country if history.parcel.establishment.country is not None else '-'}"
-
-    def get_establishment(self, history):
-        return history.parcel.establishment.name if history.parcel else None
-
-    def get_establishment_description(self, history):
-        return history.parcel.establishment.description if history.parcel else None
 
     def get_parcel(self, history):
         return history.parcel.name if history.parcel else None

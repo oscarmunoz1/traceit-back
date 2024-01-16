@@ -48,3 +48,6 @@ class Establishment(models.Model):
 
     def get_absolute_url(self) -> str:
         return reverse("establishment-detail", kwargs={"id": self.id})
+
+    def get_location(self) -> str:
+        return f"{self.city if self.city is not None else '-'}, {self.country if self.country is not None else '-'}"
