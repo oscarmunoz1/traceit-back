@@ -68,7 +68,8 @@ class ParcelViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
     ):
         parcel = self.get_object()
         history_data = request.data
-        history = parcel.finish_current_history(history_data)
+        images = request.FILES.getlist("album[images]")
+        history = parcel.finish_current_history(history_data, images)
         if history is not None:
             return Response(HistorySerializer(history).data)
         return Response(status=400)

@@ -192,6 +192,7 @@ class HistorySerializer(serializers.ModelSerializer):
     members = serializers.SerializerMethodField()
     product = serializers.SerializerMethodField()
     parcel = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
 
     class Meta:
         model = History
@@ -209,6 +210,7 @@ class HistorySerializer(serializers.ModelSerializer):
             "product",
             "qr_code",
             "reputation",
+            "images",
         ]
         read_only_fields = ["id", "created_at", "updated_at", "certificate_percentage"]
 
@@ -233,6 +235,16 @@ class HistorySerializer(serializers.ModelSerializer):
                     event.created_by.first_name + " " + event.created_by.last_name
                 )
         return members[0:3]
+
+    def get_images(self, history):
+        try:
+            return [
+                image.image.url
+                for image in history.album.images.all()
+                if image.image is not None
+            ]
+        except:
+            return []
 
 
 class ListHistoryClassSerializer(serializers.ModelSerializer):
@@ -305,6 +317,7 @@ class PublicHistorySerializer(serializers.ModelSerializer):
     parcel = PublicParcelSerializer()
     product = PublicProductSerializer()
     history_scan = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
 
     class Meta:
         model = History
@@ -320,6 +333,7 @@ class PublicHistorySerializer(serializers.ModelSerializer):
             "company",
             "parcel",
             "history_scan",
+            "images",
         ]
 
     def get_events(self, history):
@@ -336,6 +350,16 @@ class PublicHistorySerializer(serializers.ModelSerializer):
 
     def get_history_scan(self, history):
         return self.context.get("history_scan", None)
+
+    def get_images(self, history):
+        try:
+            return [
+                image.image.url
+                for image in history.album.images.all()
+                if image.image is not None
+            ]
+        except:
+            return []
 
 
 class HistoryListOptionsSerializer(serializers.ModelSerializer):

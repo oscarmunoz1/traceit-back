@@ -4,6 +4,7 @@ from io import BytesIO
 from django.db import models
 from django.db.models import Avg
 from django.core.validators import MinValueValidator, MaxValueValidator
+from common.models import Gallery
 
 from django.core.files.base import ContentFile
 
@@ -31,6 +32,9 @@ class History(models.Model):
     description = models.TextField(blank=True, null=True)
     production_amount = models.FloatField(default=0)
     qr_code = models.ImageField(upload_to="qr_codes", blank=True)
+    album = models.ForeignKey(
+        "common.Gallery", on_delete=models.CASCADE, blank=True, null=True
+    )
     reputation = models.FloatField(
         default=0, validators=[MinValueValidator(0), MaxValueValidator(5)]
     )
@@ -109,7 +113,16 @@ class History(models.Model):
         certified_events = events.filter(certified=True).count()
         return int(certified_events / events.count() * 100)
 
-    def finish(self, history_data):
+    def finish(self, history_data, images):
+        if images is not None:
+            gallery = Gallery.objects.create()
+            for image_data in images:
+                gallery_image = gallery.images.create(image=image_data)
+                gallery_image.save()
+            print(gallery.id)
+            print(gallery.images.all())
+            self.album = gallery
+
         self.finish_date = history_data["finish_date"]
         self.observation = history_data["observation"]
         self.published = True

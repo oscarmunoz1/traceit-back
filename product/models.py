@@ -41,9 +41,9 @@ class Parcel(models.Model):
     def __str__(self):
         return str(self.id) + " - " + self.name + " - " + self.establishment.name
 
-    def finish_current_history(self, history_data):
+    def finish_current_history(self, history_data, images):
         if self.current_history is not None:
-            self.current_history.finish(history_data)
+            self.current_history.finish(history_data, images)
             history = self.current_history
             self.current_history = None
             self.save()
