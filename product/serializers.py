@@ -25,7 +25,7 @@ class ParcelBasicSerializer(ModelSerializer):
         return (
             parcel.current_history.product.name
             if parcel.current_history and parcel.current_history.product
-            else "No current production"
+            else None
         )
 
     def get_has_current_production(self, parcel):
@@ -49,6 +49,7 @@ class RetrieveParcelSerializer(ModelSerializer):
     establishment = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
+    productions_completed = serializers.SerializerMethodField()
 
     class Meta:
         model = Parcel
@@ -82,6 +83,9 @@ class RetrieveParcelSerializer(ModelSerializer):
         except:
             return []
 
+    def get_productions_completed(self, parcel):
+        return parcel.productions_completed
+
 
 class CreateParcelSerializer(ModelSerializer):
     product = serializers.SerializerMethodField()
@@ -93,7 +97,7 @@ class CreateParcelSerializer(ModelSerializer):
         fields = "__all__"
 
     def get_product(self, parcel):
-        return "No current production"
+        return None
 
     def update(self, instance, validated_data):
         album_data = self.context.get("request").FILES

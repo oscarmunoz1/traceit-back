@@ -1,5 +1,5 @@
 from django.db import models
-
+from datetime import datetime
 from company.models import Establishment
 
 
@@ -40,6 +40,10 @@ class Parcel(models.Model):
 
     def __str__(self):
         return str(self.id) + " - " + self.name + " - " + self.establishment.name
+
+    @property
+    def productions_completed(self):
+        return self.histories.filter(finish_date__year=datetime.now().year).count()
 
     def finish_current_history(self, history_data, images):
         if self.current_history is not None:
