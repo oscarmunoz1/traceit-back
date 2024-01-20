@@ -44,6 +44,18 @@ class HistoryViewSet(viewsets.ModelViewSet):
     serializer_class = HistorySerializer
     filter_backends = [filters.OrderingFilter]
 
+    def get_serializer_class(self):
+        if (
+            self.action == "create"
+            or self.action == "update"
+            or self.action == "partial_update"
+        ):
+            return HistorySerializer
+        elif self.action == "list":
+            return ListHistoryClassSerializer
+        else:
+            return HistorySerializer
+
     def get_queryset(self):
         if self.action == "public_history":
             return History.objects.filter(published=True)
@@ -266,6 +278,7 @@ class EventViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
                 event = event_model.objects.create(
                     history=history,
                     index=index,
+                    created_by=self.request.user,
                     **serializer.validated_data,
                 )
                 event.save()

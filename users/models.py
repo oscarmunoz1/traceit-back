@@ -25,6 +25,7 @@ class User(AbstractUser):
     user_type = models.PositiveSmallIntegerField(
         choices=USER_TYPE_CHOICES, default=CONSUMER
     )
+    image = models.ImageField(upload_to="user_images/", blank=True, null=True)
 
     REQUIRED_FIELDS = []
     USERNAME_FIELD = "email"

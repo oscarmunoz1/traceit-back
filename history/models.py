@@ -70,6 +70,28 @@ class History(models.Model):
             else ""
         )
 
+    def get_involved_users(self):
+        users = (
+            self.history_weatherevent_events.all()
+            .values_list("created_by", flat=True)
+            .union(
+                self.history_chemicalevent_events.all().values_list(
+                    "created_by", flat=True
+                )
+            )
+            .union(
+                self.history_productionevent_events.all().values_list(
+                    "created_by", flat=True
+                )
+            )
+            .union(
+                self.history_generalevent_events.all().values_list(
+                    "created_by", flat=True
+                )
+            )
+        )
+        return users
+
     def update_reputation(self):
         average_reputation = self.reviews.aggregate(Avg("rating"))["rating__avg"]
         if average_reputation is not None:

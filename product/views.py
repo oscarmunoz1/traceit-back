@@ -53,7 +53,7 @@ class ParcelViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
     ):
         parcel = self.get_object()
 
-        histories = parcel.histories.filter(published=True)
+        histories = parcel.histories.filter(published=True).order_by("-id")
         if parcel.current_history is not None:
             return Response(
                 HistorySerializer(

@@ -18,6 +18,8 @@ from .constants import (
 from common.models import Gallery
 from product.models import Product, Parcel
 from company.models import Establishment
+from users.models import User
+from users.serializers import BasicUserSerializer
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -193,6 +195,7 @@ class HistorySerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()
     parcel = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
+    members = serializers.SerializerMethodField()
 
     class Meta:
         model = History
@@ -211,6 +214,7 @@ class HistorySerializer(serializers.ModelSerializer):
             "qr_code",
             "reputation",
             "images",
+            "members",
         ]
         read_only_fields = ["id", "created_at", "updated_at", "certificate_percentage"]
 
@@ -245,6 +249,12 @@ class HistorySerializer(serializers.ModelSerializer):
             ]
         except:
             return []
+
+    def get_members(self, history):
+        members = User.objects.filter(id__in=history.get_involved_users()).order_by(
+            "first_name"
+        )[0:2]
+        return BasicUserSerializer(members, many=True).data
 
 
 class ListHistoryClassSerializer(serializers.ModelSerializer):

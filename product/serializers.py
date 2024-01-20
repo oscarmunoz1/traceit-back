@@ -3,12 +3,15 @@ from .models import Parcel, Product
 from rest_framework import serializers
 from common.serializers import GallerySerializer, GalleryImageSerializer
 from common.models import Gallery
+from users.models import User
+from users.serializers import BasicUserSerializer
 
 
 class ParcelBasicSerializer(ModelSerializer):
     product = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     has_current_production = serializers.SerializerMethodField()
+    members = serializers.SerializerMethodField()
 
     class Meta:
         model = Parcel
@@ -19,6 +22,7 @@ class ParcelBasicSerializer(ModelSerializer):
             "product",
             "image",
             "has_current_production",
+            "members",
         )
 
     def get_product(self, parcel):
@@ -42,6 +46,14 @@ class ParcelBasicSerializer(ModelSerializer):
             )
         except:
             return None
+
+    def get_members(self, parcel):
+        members_ids = []
+        for history in parcel.histories.all():
+            members_ids += history.get_involved_users()
+        members_ids = list(set(members_ids))
+        members = User.objects.filter(id__in=members_ids)[0:2]
+        return BasicUserSerializer(members, many=True).data
 
 
 class RetrieveParcelSerializer(ModelSerializer):

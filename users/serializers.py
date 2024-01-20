@@ -47,6 +47,7 @@ class BasicUserSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "user_type",
+            "image",
         ]
         read_only_field = [
             "is_active",
