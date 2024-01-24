@@ -1,5 +1,4 @@
 from .serializers import BasicUserSerializer
-from .models import User
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import filters
@@ -15,7 +14,7 @@ from rest_framework.decorators import (
     api_view,
 )
 from django.shortcuts import get_object_or_404
-
+from users.models import WorksIn, User
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from .serializers import LoginSerializer, RegisterSerializer, MeSerializer
@@ -79,6 +78,12 @@ class UserViewSet(viewsets.ModelViewSet):
         user.is_active = True
         user.save()
         return Response(status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"])
+    def roles(self, request, pk=None):
+        return Response(
+            [{"id": role[0], "name": role[1]} for role in WorksIn.USER_ROLES]
+        )
 
 
 class LoginViewSet(viewsets.ModelViewSet, TokenObtainPairView):

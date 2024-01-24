@@ -18,6 +18,7 @@ from .serializers import (
 from .models import Company, Establishment
 from .constants import ALLOWED_PERIODS
 from users.models import WorksIn
+from users.serializers import WorksInSerializer
 from product.models import Parcel, Product
 from product.serializers import ProductListOptionsSerializer
 from history.models import History, HistoryScan
@@ -36,6 +37,11 @@ class CompanyViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
             return CreateCompanySerializer
         return RetrieveCompanySerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -44,6 +50,15 @@ class CompanyViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
             user=request.user, company=company, role=WorksIn.COMPANY_ADMIN
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["get"])
+    def members(self, request, pk=None, company_pk=None):
+        company = get_object_or_404(Company, pk=pk)
+        members = WorksIn.objects.filter(company=company)
+        return Response(
+            WorksInSerializer(members, many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class EstablishmentViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):

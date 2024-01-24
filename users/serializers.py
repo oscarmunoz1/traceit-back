@@ -13,18 +13,34 @@ class WorksInSerializer(serializers.ModelSerializer):
     """
 
     id = serializers.ReadOnlyField(source="company.id")
-    name = serializers.ReadOnlyField(source="company.name")
+    user = serializers.SerializerMethodField()
+    establishments_in_charge = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
 
     class Meta:
         model = WorksIn
         fields = (
             "id",
-            "name",
+            "user",
             "role",
+            "establishments_in_charge",
         )
 
     def get_picture(self, obj):
         return obj.company.picture.url if obj.company.picture else None
+
+    def get_establishments_in_charge(self, obj):
+        from company.serializers import BasicEstablishmentSerializer
+
+        return BasicEstablishmentSerializer(
+            obj.establishments_in_charge.all(), many=True
+        ).data
+
+    def get_user(self, obj):
+        return obj.user.get_full_name()
+
+    def get_role(self, obj):
+        return obj.get_role_display()
 
 
 class BasicUserSerializer(serializers.ModelSerializer):

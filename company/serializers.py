@@ -4,11 +4,13 @@ from rest_framework import serializers
 from product.serializers import ParcelBasicSerializer
 from common.serializers import GallerySerializer
 from common.models import Gallery
+from users.models import WorksIn
 
 
 class EstablishmentSerializer(ModelSerializer):
     parcels = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+    location = serializers.SerializerMethodField()
 
     class Meta:
         model = Establishment
@@ -24,6 +26,7 @@ class EstablishmentSerializer(ModelSerializer):
             "parcels",
             "image",
             "country",
+            "location",
         )
 
     def get_parcels(self, establishment):
@@ -40,6 +43,9 @@ class EstablishmentSerializer(ModelSerializer):
             )
         except:
             return None
+
+    def get_location(self, establishment):
+        return establishment.get_location()
 
 
 class UpdateEstablishmentSerializer(ModelSerializer):
@@ -165,6 +171,15 @@ class EstablishmentProductsReputationSerializer(serializers.Serializer):
         fields = ["series", "options"]
 
 
+class BasicEstablishmentSerializer(ModelSerializer):
+    class Meta:
+        model = Establishment
+        fields = (
+            "id",
+            "name",
+        )
+
+
 class RetrieveCompanySerializer(ModelSerializer):
     establishments = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
@@ -186,7 +201,15 @@ class RetrieveCompanySerializer(ModelSerializer):
         )
 
     def get_establishments(self, company):
-        return EstablishmentSerializer(company.establishment_set.all(), many=True).data
+        user = self.context["request"].user
+        worksIn = WorksIn.objects.filter(user=user, company=company)[0]
+        if worksIn.role == "CA":
+            return EstablishmentSerializer(
+                company.establishment_set.all().order_by("name"), many=True
+            ).data
+        return EstablishmentSerializer(
+            worksIn.establishments_in_charge.all(), many=True
+        ).data
 
     def get_image(self, company):
         try:
