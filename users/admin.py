@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, WorksIn, VerificationCode
+from .models import User, WorksIn, VerificationCode, WorksIn
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
 
@@ -69,3 +69,4 @@ class CustomUserAdmin(UserAdmin):
 
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(VerificationCode)
+admin.site.register(WorksIn)
