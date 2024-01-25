@@ -27,7 +27,7 @@ CSRF_COOKIE_SECURE = True
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 SERVER_EMAIL = os.environ.get("FROM_EMAIL_ADDRESS", "info@traceit.io")
-DEFAULT_FROM_EMAIL = os.environ.get("FROM_EMAIL_ADDRESS", "info@traceit.io")
+DEFAULT_FROM_EMAIL = config("FROM_EMAIL_ADDRESS", "info@traceit.io")
 
 SENDGRID_API_KEY = config("SENDGRID_API_KEY")
 
