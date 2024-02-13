@@ -55,8 +55,8 @@ jobs:
       DJANGO_SETTINGS_MODULE: backend.settings
       SECRET_KEY: "django-insecure-x:yv-0g&cajngn8rte!cc(!@%-2uc_ds($#(j4a-vab1zxn_5"
       DATABASE_NAME: "test_db"
-      DATABASE_USER: "omunoz"
-      DATABASE_PASSWORD: "om123456"
+      DATABASE_USER: "postgres"
+      DATABASE_PASSWORD: "postgres"
       DATABASE_HOST: "localhost"
       DATABASE_PORT: "5432"
       ALLOWED_HOSTS: "*"
