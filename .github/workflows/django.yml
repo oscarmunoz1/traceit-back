@@ -2,13 +2,12 @@ name: Django CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     services:
@@ -28,30 +27,44 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8  # Use the version of Python you need
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
 
-    - name: Install Poetry
-      run: |
-        pip install poetry
+      - name: Install Poetry
+        run: |
+          pip install poetry
 
-    - name: Install dependencies
-      run: |
-        poetry config virtualenvs.create false
-        poetry install
+      - name: Install dependencies
+        run: |
+          poetry config virtualenvs.create false
+          poetry install
 
-    - name: Run migrations
-      run: |
-        poetry run python manage.py migrate
+      - name: Run migrations
+        run: |
+          poetry run python manage.py migrate
 
-    - name: Run tests
-      run: |
-        poetry run python manage.py test
+      - name: Run tests
+        run: |
+          poetry run python manage.py test
 
     env:
-      DJANGO_SETTINGS_MODULE: your_project.settings
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+      DJANGO_SETTINGS_MODULE: backend.settings
+      SECRET_KEY: "django-insecure-x:yv-0g&cajngn8rte!cc(!@%-2uc_ds($#(j4a-vab1zxn_5"
+      DATABASE_NAME: "test_db"
+      DATABASE_USER: "omunoz"
+      DATABASE_PASSWORD: "om123456"
+      DATABASE_HOST: "localhost"
+      DATABASE_PORT: "5432"
+      ALLOWED_HOSTS: "*"
+      DEBUG: True
+      CSRF_TRUSTED_ORIGINS:
+        ["http://app.localhost:3000", "http://localhost:3000"]
+      BASE_TRACEIT_URL: http://localhost:3000/
+      BASE_APP_URL: http://app.localhost:3000/
+      EMAIL_HOST: "smtp.sendgrid.net"
+      SENDGRID_API_KEY: "key"
+      FROM_EMAIL_ADDRESS: info@traceit.io
