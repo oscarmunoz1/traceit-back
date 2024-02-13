@@ -1,0 +1,57 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    services:
+      postgresql:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres is ready
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8  # Use the version of Python you need
+
+    - name: Install Poetry
+      run: |
+        pip install poetry
+
+    - name: Install dependencies
+      run: |
+        poetry config virtualenvs.create false
+        poetry install
+
+    - name: Run migrations
+      run: |
+        poetry run python manage.py migrate
+
+    - name: Run tests
+      run: |
+        poetry run python manage.py test
+
+    env:
+      DJANGO_SETTINGS_MODULE: your_project.settings
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
