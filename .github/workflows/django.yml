@@ -17,6 +17,8 @@ jobs:
           POSTGRES_DB: test_db
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
         ports:
           - 5432:5432
         # Set health checks to wait until postgres is ready
@@ -52,7 +54,8 @@ jobs:
           poetry run python manage.py test
 
     env:
-      DJANGO_SETTINGS_MODULE: backend.settings
+      DJANGO_SETTINGS_MODULE: backend.settings.dev
+      DEBUG: True
       SECRET_KEY: "django-insecure-x:yv-0g&cajngn8rte!cc(!@%-2uc_ds($#(j4a-vab1zxn_5"
       DATABASE_NAME: "test_db"
       DATABASE_USER: "postgres"
