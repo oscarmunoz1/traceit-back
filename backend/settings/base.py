@@ -137,20 +137,20 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 
-AWS_ACCESS_KEY_ID = "AKIAQGLIFETF2HN67DMN"
-AWS_SECRET_ACCESS_KEY = "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"
-AWS_STORAGE_BUCKET_NAME = "traceit-bucket"
-AWS_S3_SIGNATURE_NAME = ("s3v4",)
-AWS_S3_REGION_NAME = "us-east-2"
-AWS_S3_FILE_OVERWRITE = False
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = 'us-east-2'
 AWS_DEFAULT_ACL = 'public-read'
 AWS_S3_VERIFY = True
 AWS_S3_ADDRESSING_STYLE = "virtual"
-
+AWS_S3_VERIFY = True
+# Use S3 for media files
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # Optional but recommended settings
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',  # 24 hours of cache
+    'CacheControl': 'max-age=86400',
 }
 
 LOGGING = {
