@@ -4,14 +4,13 @@ from backend.settings.base import *
 from decouple import config
 
 
-ALLOWED_HOSTS = ["api-us-east-1.traceit.io"]
+ALLOWED_HOSTS = ["api.trazo.io"]
 
 
 CSRF_TRUSTED_ORIGINS = [
     "https://*.trazo.io",
     "https://trazo.io",
-    "https://api.trazo.io",
-    "api.trazo.io"
+    "https://api.trazo.io"
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
