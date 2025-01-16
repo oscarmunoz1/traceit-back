@@ -137,16 +137,21 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 
-AWS_ACCESS_KEY_ID = "AKIAQGLIFETF2HN67DMN "
+AWS_ACCESS_KEY_ID = "AKIAQGLIFETF2HN67DMN"
 AWS_SECRET_ACCESS_KEY = "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"
 AWS_STORAGE_BUCKET_NAME = "traceit-bucket"
 AWS_S3_SIGNATURE_NAME = ("s3v4",)
 AWS_S3_REGION_NAME = "us-east-2"
 AWS_S3_FILE_OVERWRITE = False
-AWS_DEFAULT_ACL = None
-AWS_S3_VERITY = True
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+AWS_DEFAULT_ACL = 'public-read'
+AWS_S3_VERIFY = True
+AWS_S3_ADDRESSING_STYLE = "virtual"
 
+# Optional but recommended settings
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',  # 24 hours of cache
+}
 
 LOGGING = {
     # Version del logging
