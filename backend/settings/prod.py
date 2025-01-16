@@ -11,6 +11,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://*.trazo.io",
     "https://trazo.io",
     "https://api.trazo.io",
+    "api.trazo.io"
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
