@@ -141,12 +141,12 @@ AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = 'us-east-2'
-AWS_DEFAULT_ACL = 'public-read'
 AWS_S3_VERIFY = True
 AWS_S3_ADDRESSING_STYLE = "virtual"
-AWS_S3_VERIFY = True
+
 # Use S3 for media files
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
 # Optional but recommended settings
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_OBJECT_PARAMETERS = {
