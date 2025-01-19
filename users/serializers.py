@@ -107,6 +107,7 @@ class RegisterSerializer(BasicUserSerializer):
     email = serializers.EmailField(required=True, write_only=True, max_length=128)
     first_name = serializers.CharField(required=True, write_only=True, max_length=128)
     last_name = serializers.CharField(required=True, write_only=True, max_length=128)
+    user_type = serializers.CharField(required=True, write_only=True, max_length=128)
 
     class Meta:
         model = User
@@ -118,11 +119,12 @@ class RegisterSerializer(BasicUserSerializer):
             "last_name",
             "password",
             "is_active",
+            "user_type",
         ]
 
     def create(self, validated_data):
         try:
             user = User.objects.get(email=validated_data["email"])
         except ObjectDoesNotExist:
-            user = User.objects.create_user(**validated_data, user_type=PRODUCER)
+            user = User.objects.create_user(**validated_data)
         return user

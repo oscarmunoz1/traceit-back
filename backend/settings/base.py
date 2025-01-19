@@ -26,6 +26,7 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 BASE_TRACEIT_URL = config("BASE_TRACEIT_URL")
 
 BASE_APP_URL = config("BASE_APP_URL")
+BASE_CONSUMER_URL = config("BASE_CONSUMER_URL")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("SECRET_KEY")
@@ -136,22 +137,26 @@ EMAIL_HOST_PASSWORD = config("SENDGRID_API_KEY")
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
+BASE_URL = config("BASE_URL")
 
-AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+# Common storage settings
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# S3 configuration (will be used only when DEFAULT_FILE_STORAGE is set to S3)
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default=None)
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default=None)
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default=None)
 AWS_S3_REGION_NAME = 'us-east-2'
 AWS_S3_VERIFY = True
 AWS_S3_ADDRESSING_STYLE = "virtual"
-
-# Use S3 for media files
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-# Optional but recommended settings
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
+
+# Use S3 for media files
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 LOGGING = {
     # Version del logging
@@ -255,9 +260,6 @@ STATIC_URL = "/static/"
 # Simplified static file serving.
 # https://pypi.org/project/whitenoise/
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
 
 # CORS settings
 

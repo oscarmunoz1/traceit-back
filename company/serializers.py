@@ -30,18 +30,27 @@ class EstablishmentSerializer(ModelSerializer):
         )
 
     def get_parcels(self, establishment):
-        return ParcelBasicSerializer(establishment.parcels.all(), many=True).data
+        return ParcelBasicSerializer(
+            establishment.parcels.all(), 
+            many=True,
+            context=self.context
+        ).data
 
     def get_image(self, establishment):
         try:
-            return (
-                establishment.album.images.first().image.url
-                if establishment.album
-                and establishment.album.images.exists()
-                and establishment.album.images.first().image is not None
-                else None
-            )
-        except:
+            if not establishment.album or not establishment.album.images.exists():
+                return None
+            
+            image = establishment.album.images.first().image
+            if not image:
+                return None
+
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        except Exception as e:
+            print(f"Error getting image: {str(e)}")
             return None
 
     def get_location(self, establishment):
@@ -100,16 +109,24 @@ class RetrieveEstablishmentSerializer(ModelSerializer):
         fields = "__all__"
 
     def get_parcels(self, establishment):
-        return ParcelBasicSerializer(establishment.parcels.all(), many=True).data
+        print('establishment.parcels.all()\n\n\n\n\n\n\n\n\n');
+        print(establishment.parcels.all());
+        print('entro aca')
+        return ParcelBasicSerializer(establishment.parcels.all(), many=True, context=self.context).data
 
     def get_images(self, establishment):
         try:
+            if not establishment.album:
+                return []
+            
+            request = self.context.get('request')
             return [
-                image.image.url
+                request.build_absolute_uri(image.image.url) if request else image.image.url
                 for image in establishment.album.images.all()
                 if image.image is not None
             ]
-        except:
+        except Exception as e:
+            print(f"Error getting images: {str(e)}")
             return []
 
 
@@ -199,16 +216,21 @@ class RetrieveCompanySerializer(ModelSerializer):
             "description",
             "establishments",
         )
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context 
 
     def get_establishments(self, company):
         user = self.context["request"].user
         worksIn = WorksIn.objects.filter(user=user, company=company)[0]
         if worksIn.role == "CA":
             return EstablishmentSerializer(
-                company.establishment_set.all().order_by("name"), many=True
+                company.establishment_set.all().order_by("name"), many=True, context=self.context
             ).data
         return EstablishmentSerializer(
-            worksIn.establishments_in_charge.all(), many=True
+            worksIn.establishments_in_charge.all(), many=True, context=self.context
         ).data
 
     def get_image(self, company):

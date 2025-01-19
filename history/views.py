@@ -15,6 +15,7 @@ from .models import (
     GeneralEvent,
     HistoryScan,
 )
+from reviews.models import Review
 from .serializers import (
     HistorySerializer,
     WeatherEventSerializer,
@@ -59,6 +60,21 @@ class HistoryViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.action == "public_history":
             return History.objects.filter(published=True)
+        elif self.action == "my_scans":
+            return History.objects.filter(
+                history_scans__user=self.request.user
+            ).select_related(
+                'product',
+                'parcel__establishment'
+            ).order_by('id', '-history_scans__date').distinct('id')
+        elif self.action == "my_reviews":
+            return Review.objects.filter(
+                user=self.request.user
+            ).select_related(
+                'production',
+                'production__product',
+                'production__parcel__establishment'
+            ).order_by('-date')
         else:
             return History.objects.all()
 
@@ -90,11 +106,9 @@ class HistoryViewSet(viewsets.ModelViewSet):
         serializer = HistorySerializer(history)
         return Response(serializer.data)
 
-    @action(detail=True, methods=["get"])
-    @permission_classes([AllowAny])
+    @action(detail=True, methods=["get"], permission_classes=[AllowAny])
     def public_history(self, request, pk=None):
         queryset = self.get_queryset()
-
         history = get_object_or_404(queryset, pk=pk)
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for:
@@ -124,6 +138,36 @@ class HistoryViewSet(viewsets.ModelViewSet):
             history, context={"history_scan": history_scan.id}
         )
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def my_scans(self, request):
+        queryset = self.get_queryset()
+        scans_data = []
+        for history in queryset:
+            latest_scan = history.history_scans.filter(user=request.user).order_by('-date').first()
+            if latest_scan:
+                scans_data.append(
+                    PublicHistorySerializer(
+                        history, 
+                        context={"history_scan": latest_scan.id}
+                    ).data
+                )
+        return Response(scans_data)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def my_reviews(self, request):
+        queryset = self.get_queryset()
+        reviews_data = []
+        for review in queryset:
+            reviews_data.append({
+                'id': review.id,
+                'headline': review.headline,
+                'written_review': review.written_review,
+                'date': review.date,
+                'rating': review.rating,
+                'history': HistorySerializer(review.production).data
+            })
+        return Response(reviews_data)
 
 
 class PublicHistoryScanViewSet(viewsets.ModelViewSet):

@@ -468,3 +468,8 @@ class EstablishmentViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
             result,
             status=status.HTTP_200_OK,
         )
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context

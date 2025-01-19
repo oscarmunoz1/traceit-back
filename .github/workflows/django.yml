@@ -66,6 +66,7 @@ jobs:
       DEBUG: True
       BASE_TRACEIT_URL: http://localhost:3000/
       BASE_APP_URL: http://app.localhost:3000/
+      BASE_CONSUMER_URL: http://consumer.localhost:3000/
       EMAIL_HOST: "smtp.sendgrid.net"
       SENDGRID_API_KEY: "key"
-      FROM_EMAIL_ADDRESS: info@traceit.io
+      FROM_EMAIL_ADDRESS: info@trazo.io

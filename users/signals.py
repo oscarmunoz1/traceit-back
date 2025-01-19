@@ -5,6 +5,7 @@ from django.conf import settings
 from smtplib import SMTPException
 import logging
 from .utils import send_invitation_to_user
+from .constants import PRODUCER, CONSUMER
 
 logger = logging.getLogger(__name__)
 
@@ -22,13 +23,17 @@ def create_verification_code(sender, instance, created, **kwargs):
     if created:
         code = generate_verification_code()  # generate a random code
         VerificationCode.objects.create(user=instance, code=code)
-
-        verification_link = f"{settings.BASE_APP_URL}auth/verifyemail?email={instance.email}&code={code}"
+        verification_link = ""
+        user_type = int(instance.user_type)
+        if user_type == PRODUCER:
+            verification_link = f"{settings.BASE_APP_URL}auth/verifyemail?email={instance.email}&code={code}"
+        elif user_type == CONSUMER:
+            verification_link = f"{settings.BASE_CONSUMER_URL}auth/verifyemail?email={instance.email}&code={code}"
 
         # send verification code to user
         try:
             send_invitation_to_user(
-                instance.email, verification_link, instance.first_name, instance.email
+                instance.email, verification_link, instance.first_name, instance.email, instance.user_type
             )
         except SMTPException as e:
             logger.error(

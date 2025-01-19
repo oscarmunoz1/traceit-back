@@ -35,11 +35,14 @@ CSRF_COOKIE_DOMAIN = "localhost"
 CSRF_COOKIE_SECURE = True
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-SERVER_EMAIL = os.environ.get("FROM_EMAIL_ADDRESS", "info@traceit.io")
-DEFAULT_FROM_EMAIL = os.environ.get("FROM_EMAIL_ADDRESS", "info@traceit.io")
+SERVER_EMAIL = os.environ.get("FROM_EMAIL_ADDRESS", "info@trazo.io")
+DEFAULT_FROM_EMAIL = os.environ.get("FROM_EMAIL_ADDRESS", "info@trazo.io")
 
 EMAIL_PORT = 1025
 EMAIL_HOST = "localhost"
 EMAIL_USE_TLS = False
 EMAIL_HOST_USER = None
 EMAIL_HOST_PASSWORD = None
+
+# Use local filesystem in development
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'

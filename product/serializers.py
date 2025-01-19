@@ -5,6 +5,7 @@ from common.serializers import GallerySerializer, GalleryImageSerializer
 from common.models import Gallery
 from users.models import User
 from users.serializers import BasicUserSerializer
+from django.conf import settings
 
 
 class ParcelBasicSerializer(ModelSerializer):
@@ -37,14 +38,22 @@ class ParcelBasicSerializer(ModelSerializer):
 
     def get_image(self, parcel):
         try:
-            return (
-                parcel.album.images.first().image.url
-                if parcel.album
-                and parcel.album.images.exists()
-                and parcel.album.images.first().image is not None
-                else None
-            )
-        except:
+            if not parcel.album or not parcel.album.images.exists():
+                return None
+            
+            image = parcel.album.images.first().image
+            if not image:
+                return None
+            print('image.url\n\n\n\n\n\n\n\n\n');
+            print(image.url);
+            request = self.context.get('request')
+            print('request\n\n\n\n\n\n\n\n\n');
+            print(request);
+            if request:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        except Exception as e:
+            print(f"Error getting image: {str(e)}")
             return None
 
     def get_members(self, parcel):
@@ -87,12 +96,17 @@ class RetrieveParcelSerializer(ModelSerializer):
 
     def get_images(self, parcel):
         try:
+            if not parcel.album:
+                return []
+            
+            request = self.context.get('request')
             return [
-                image.image.url
+                request.build_absolute_uri(image.image.url) if request else image.image.url
                 for image in parcel.album.images.all()
                 if image.image is not None
             ]
-        except:
+        except Exception as e:
+            print(f"Error getting images: {str(e)}")
             return []
 
     def get_productions_completed(self, parcel):
@@ -135,8 +149,17 @@ class CreateParcelSerializer(ModelSerializer):
 
     def get_image(self, parcel):
         try:
+
+            request = self.context.get('request')
+
+            print('request.build_absolute_uri(parcel.album.images.first().image.url)\n\n\n\n\n\n\n\n\n');
+            print(                request.build_absolute_uri(parcel.album.images.first().image.url)
+                if parcel.album
+                and parcel.album.images.exists()
+                and parcel.album.images.first().image is not None
+                else None);
             return (
-                parcel.album.images.first().image.url
+                request.build_absolute_uri(parcel.album.images.first().image.url)
                 if parcel.album
                 and parcel.album.images.exists()
                 and parcel.album.images.first().image is not None
