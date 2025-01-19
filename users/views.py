@@ -24,6 +24,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from django.conf import settings
 
+from users.constants import SUPERUSER, PRODUCER, CONSUMER
+
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = BasicUserSerializer
@@ -91,40 +93,75 @@ class LoginViewSet(viewsets.ModelViewSet, TokenObtainPairView):
     permission_classes = (AllowAny,)
     http_method_names = ["post"]
 
+    def get_subdomain(self, request):
+        # First try to get from Origin header
+        origin = request.headers.get('Origin')
+        if origin:
+            # Parse the origin URL
+            from urllib.parse import urlparse
+            parsed_uri = urlparse(origin)
+            # Get the hostname (e.g., 'app.localhost:3000' or 'app.trazo.io')
+            hostname = parsed_uri.netloc
+            # Split and get first part
+            subdomain = hostname.split('.')[0]
+            return subdomain
+        
+        # Fallback to host header
+        host = request.get_host()
+        return host.split('.')[0] if '.' in host else None
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-
+        
         try:
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
             raise InvalidToken(e.args[0])
 
-        response = Response(serializer.validated_data, status=status.HTTP_200_OK)
+        # Get user type and validate subdomain access
+        user_type = serializer.validated_data.get('user_type')
+        subdomain = self.get_subdomain(request)
 
+        if subdomain == 'app':
+            if user_type not in [SUPERUSER, PRODUCER]:
+                return Response(
+                    {"error": "Access denied"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        elif subdomain == 'consumer':
+            if user_type == CONSUMER:
+                # Add additional consumer-specific validation if needed
+                pass
+        else:
+            return Response(
+                {"error": "Invalid domain"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        response = Response(serializer.validated_data, status=status.HTTP_200_OK)
+        
+        # Set secure cookie options
+        cookie_options = {
+            'secure': settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+            'httponly': settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+            'samesite': settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+            'domain': settings.CSRF_COOKIE_DOMAIN
+        }
+
+        # Set cookies with improved security
         response.set_cookie(
             key="access",
             value=serializer.validated_data["access"],
             expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
-            secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
-            httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
-            samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+            **cookie_options
         )
         response.set_cookie(
             key="refresh",
             value=serializer.validated_data["refresh"],
-            expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
-            secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
-            httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
-            samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+            expires=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"],
+            **cookie_options
         )
-        response.set_cookie(
-            key="logged_in",
-            value=True,
-            expires=timedelta(seconds=20),
-            secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
-            httponly=False,
-            samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
-        )
+        
         csrf.get_token(request)
         return response
 
