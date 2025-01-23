@@ -56,6 +56,11 @@ class HistoryViewSet(viewsets.ModelViewSet):
             return ListHistoryClassSerializer
         else:
             return HistorySerializer
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
 
     def get_queryset(self):
         if self.action == "public_history":

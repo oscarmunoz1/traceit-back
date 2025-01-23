@@ -44,11 +44,8 @@ class ParcelBasicSerializer(ModelSerializer):
             image = parcel.album.images.first().image
             if not image:
                 return None
-            print('image.url\n\n\n\n\n\n\n\n\n');
-            print(image.url);
+
             request = self.context.get('request')
-            print('request\n\n\n\n\n\n\n\n\n');
-            print(request);
             if request:
                 return request.build_absolute_uri(image.url)
             return image.url
@@ -84,14 +81,19 @@ class RetrieveParcelSerializer(ModelSerializer):
 
     def get_image(self, parcel):
         try:
-            return (
-                parcel.album.images.first().image.url
-                if parcel.album
-                and parcel.album.images.exists()
-                and parcel.album.images.first().image is not None
-                else None
-            )
-        except:
+            if not parcel.album or not parcel.album.images.exists():
+                return None
+            
+            image = parcel.album.images.first().image
+            if not image:
+                return None
+
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        except Exception as e:
+            print(f"Error getting image: {str(e)}")
             return None
 
     def get_images(self, parcel):
@@ -149,23 +151,19 @@ class CreateParcelSerializer(ModelSerializer):
 
     def get_image(self, parcel):
         try:
+            if not parcel.album or not parcel.album.images.exists():
+                return None
+            
+            image = parcel.album.images.first().image
+            if not image:
+                return None
 
             request = self.context.get('request')
-
-            print('request.build_absolute_uri(parcel.album.images.first().image.url)\n\n\n\n\n\n\n\n\n');
-            print(                request.build_absolute_uri(parcel.album.images.first().image.url)
-                if parcel.album
-                and parcel.album.images.exists()
-                and parcel.album.images.first().image is not None
-                else None);
-            return (
-                request.build_absolute_uri(parcel.album.images.first().image.url)
-                if parcel.album
-                and parcel.album.images.exists()
-                and parcel.album.images.first().image is not None
-                else None
-            )
-        except:
+            if request:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        except Exception as e:
+            print(f"Error getting image: {str(e)}")
             return None
 
 

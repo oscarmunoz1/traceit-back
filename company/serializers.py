@@ -108,12 +108,6 @@ class RetrieveEstablishmentSerializer(ModelSerializer):
         model = Establishment
         fields = "__all__"
 
-    def get_parcels(self, establishment):
-        print('establishment.parcels.all()\n\n\n\n\n\n\n\n\n');
-        print(establishment.parcels.all());
-        print('entro aca')
-        return ParcelBasicSerializer(establishment.parcels.all(), many=True, context=self.context).data
-
     def get_images(self, establishment):
         try:
             if not establishment.album:
@@ -235,14 +229,19 @@ class RetrieveCompanySerializer(ModelSerializer):
 
     def get_image(self, company):
         try:
-            return (
-                company.album.images.first().image.url
-                if company.album
-                and company.album.images.exists()
-                and company.album.images.first().image is not None
-                else None
-            )
-        except:
+            if not company.album or not company.album.images.exists():
+                return None
+            
+            image = company.album.images.first().image
+            if not image:
+                return None
+
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        except Exception as e:
+            print(f"Error getting image: {str(e)}")
             return None
 
 

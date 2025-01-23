@@ -241,12 +241,17 @@ class HistorySerializer(serializers.ModelSerializer):
 
     def get_images(self, history):
         try:
+            if not history.album:
+                return []
+            
+            request = self.context.get('request')
             return [
-                image.image.url
+                request.build_absolute_uri(image.image.url) if request else image.image.url
                 for image in history.album.images.all()
                 if image.image is not None
             ]
-        except:
+        except Exception as e:
+            print(f"Error getting images: {str(e)}")
             return []
 
     def get_members(self, history):
@@ -362,12 +367,17 @@ class PublicHistorySerializer(serializers.ModelSerializer):
 
     def get_images(self, history):
         try:
+            if not history.album:
+                return []
+            
+            request = self.context.get('request')
             return [
-                image.image.url
+                request.build_absolute_uri(image.image.url) if request else image.image.url
                 for image in history.album.images.all()
                 if image.image is not None
             ]
-        except:
+        except Exception as e:
+            print(f"Error getting images: {str(e)}")
             return []
 
 

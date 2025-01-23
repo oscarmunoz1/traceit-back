@@ -73,6 +73,11 @@ class EstablishmentViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
         ):
             return UpdateEstablishmentSerializer
         return RetrieveEstablishmentSerializer
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
 
     def _generate_filter_kwargs(
         self, period: str, production: str = "", period_filter: str = ""
