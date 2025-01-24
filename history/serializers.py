@@ -324,6 +324,22 @@ class PublicParcelSerializer(serializers.ModelSerializer):
         fields = ["name", "polygon", "map_metadata", "establishment"]
 
 
+class PublicHistoryListSerializer(serializers.ModelSerializer):
+    product = PublicProductSerializer()
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = History
+        fields = ["id", "name", "product", "reputation", "image"]
+
+    def get_image(self, history):
+        if history.album is None or history.album.images.first() is None:
+            return None
+        request = self.context.get('request')
+        image = history.album.images.first() if history.album else None
+        return request.build_absolute_uri(image.image.url) if request else image.image.url
+
+
 class PublicHistorySerializer(serializers.ModelSerializer):
     events = serializers.SerializerMethodField()
     certificate_percentage = serializers.SerializerMethodField()
@@ -331,6 +347,7 @@ class PublicHistorySerializer(serializers.ModelSerializer):
     parcel = PublicParcelSerializer()
     product = PublicProductSerializer()
     history_scan = serializers.SerializerMethodField()
+    similar_histories = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
 
     class Meta:
@@ -348,6 +365,7 @@ class PublicHistorySerializer(serializers.ModelSerializer):
             "parcel",
             "history_scan",
             "images",
+            "similar_histories",
         ]
 
     def get_events(self, history):
@@ -355,6 +373,9 @@ class PublicHistorySerializer(serializers.ModelSerializer):
 
     def get_certificate_percentage(self, history):
         return history.certificate_percentage
+
+    def get_similar_histories(self, history):
+        return PublicHistoryListSerializer(self.context.get("similar_histories", []), many=True, context={'request': self.context.get('request')}).data
 
     def get_company(self, history):
         return history.parcel.establishment.company.name if history.parcel else None

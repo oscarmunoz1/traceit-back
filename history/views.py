@@ -39,6 +39,7 @@ from .constants import (
 
 from product.models import Parcel, Product
 from backend.permissions import CompanyNestedViewSet
+from django.db.models import Q
 
 
 class HistoryViewSet(viewsets.ModelViewSet):
@@ -139,8 +140,15 @@ class HistoryViewSet(viewsets.ModelViewSet):
             city=city,
             country=country,
         )
+        similar_histories = History.objects.filter(
+            parcel__establishment__company=history.parcel.establishment.company,
+            published=True,
+        ).exclude(id=history.id).select_related(
+            'product', 
+            'parcel__establishment'
+        ).order_by('-id')[:5]
         serializer = PublicHistorySerializer(
-            history, context={"history_scan": history_scan.id}
+            history, context={"history_scan": history_scan.id, "similar_histories": similar_histories, "request": request}
         )
         return Response(serializer.data)
 
