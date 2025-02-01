@@ -220,7 +220,7 @@ class EstablishmentViewSet(CompanyNestedViewSet, viewsets.ModelViewSet):
             series_result_reviews = []
             days_range = []
             for date in date_range:
-                day = (date.weekday() + 2) % 7
+                day = date.isoweekday() % 7 + 1
                 days_range.append(day)
                 if day in result_dict:
                     series_result.append(
