@@ -258,11 +258,11 @@ class ChemicalEvent(CommonEvent):
         max_length=2, choices=CHEMICAL_EVENTS, blank=True, null=True
     )
     commercial_name = models.CharField(max_length=60, blank=True, null=True)
-    volume = models.FloatField(default=0)
-    concentration = models.FloatField(default=0)
-    area = models.FloatField(default=0, blank=True, null=True)
-    way_of_application = models.CharField(max_length=30, blank=True, null=True)
-    time_period = models.CharField(max_length=30, blank=True, null=True)
+    volume = models.CharField(max_length=60, blank=True, null=True)
+    concentration = models.CharField(max_length=60, blank=True, null=True)
+    area = models.CharField(max_length=60, blank=True, null=True)
+    way_of_application = models.CharField(max_length=60, blank=True, null=True)
+    time_period = models.CharField(max_length=60, blank=True, null=True)
     observation = models.TextField(blank=True, null=True)
 
 
