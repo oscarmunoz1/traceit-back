@@ -50,7 +50,7 @@ class ChemicalEventSerializer(EventSerializer):
         fields = "__all__"
 
     def get_type(self, chemical_event):
-        return "Appl. of " + chemical_event.get_type_display()
+        return f"event.chemical.{chemical_event.get_type_display().lower().replace(' ', '_')}"
 
     def get_event_type(self, chemical_event):
         return CHEMICAL_EVENT_TYPE
@@ -140,7 +140,7 @@ class WeatherEventSerializer(EventSerializer):
         fields = "__all__"
 
     def get_type(self, weather_event):
-        return weather_event.get_type_display()
+        return f"event.weather.{weather_event.get_type_display().lower().replace(' ', '_')}"
 
     def get_event_type(self, weather_event):
         return WEATHER_EVENT_TYPE
@@ -161,7 +161,7 @@ class ProductionEventSerializer(EventSerializer):
         fields = "__all__"
 
     def get_type(self, production_event):
-        return production_event.get_type_display()
+        return f"event.production.{production_event.get_type_display().lower().replace(' ', '_')}"
 
     def get_event_type(self, production_event):
         return PRODUCTION_EVENT_TYPE
@@ -182,7 +182,7 @@ class GeneralEventSerializer(EventSerializer):
         fields = "__all__"
 
     def get_type(self, general_event):
-        return general_event.name
+        return f"event.general.{general_event.name.lower().replace(' ', '_')}"
 
     def get_event_type(self, general_event):
         return GENERAL_EVENT_TYPE

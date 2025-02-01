@@ -16,7 +16,7 @@ def send_invitation_to_user(email, link, username, email_address, user_type):
 
     msg_plain = render_to_string("email_verification_code/message.txt", params)
     msg_html = render_to_string("email_verification_code/message.html", params)
-    subject = "Welcome to traceit, just verify your account."
+    subject = "Welcome to trazo, just verify your account."
 
     return send_mail(
         subject,
